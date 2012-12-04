@@ -1,0 +1,584 @@
+<?php
+
+/**
+ * @file
+ * Provides inline content editing functionality for fields and entities.
+ *
+ * The Edit module makes content editable inline. Rather than having to visit a
+ * separate page to edit content, it may be edited in-place.
+ *
+ * Technically, this module adds classes and data- attributes to fields and
+ * entities, enabling them for in-place editing.
+ */
+
+define('EDIT_WYSIWYG_VARIABLE', 'edit_wysiwyg');
+// @TODO: provide a UI so users can switch to
+define('EDIT_WYSIWYG_DEFAULT', 'aloha');
+
+/**
+ * Implements hook_menu()
+ */
+function edit_menu() {
+  $items = array();
+  $items['admin/edit/field/%/%/%'] = array(
+    // Access is controlled after we have inspected the entity, which can't
+    // easily happen until after the callback.
+    'access arguments' => array(TRUE),
+    'access callback'  => TRUE,
+    'page callback'    => 'edit_field_edit',
+    'page arguments'   => array(3, 4, 5),
+    'file'             => 'includes/pages.inc',
+    'delivery callback'=> 'ajax_deliver',
+    'theme callback'   => 'ajax_base_page_theme',
+  );
+  $items['admin/render-without-transformations/field/%/%/%'] = array(
+    // Access is controlled after we have inspected the entity, which can't
+    // easily happen until after the callback.
+    'access arguments' => array(TRUE),
+    'access callback'  => TRUE,
+    'page callback'    => 'edit_text_field_render_without_transformation_filters',
+    'page arguments'   => array(3, 4, 5),
+    'file'             => 'includes/pages.inc',
+    'delivery callback'=> 'ajax_deliver',
+    'theme callback'   => 'ajax_base_page_theme',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_page_alter().
+ */
+function edit_page_alter(&$page) {
+  // Don't provide a view/edit toggle on admin pages, node/add and node/%/edit pages.
+  if (arg(0) == 'admin' || (arg(0) == 'node' && arg(1) == 'add') || (arg(0) == 'node' && arg(2) == 'edit')) {
+    return;
+  }
+
+  // @todo: fix http://drupal.org/node/1798458, this is a stopgap measure
+  if (!(arg(0) == 'node' && is_numeric(arg(1)))) {
+    return;
+  }
+
+  $page['page_top']['edit'] = array(
+    'view_edit_toggle' => array(
+      '#prefix' => '<div id="editbar"><h2 class="element-invisible">' . t('In-place edit operations') . '</h2><ul id="edit_view-edit-toggles">',
+      '#suffix' => '</ul></div>',
+      'content' => array(
+        array(
+          '#theme' => 'menu_local_task',
+          '#link' => array('title' => t('View'), 'href' => $_GET['q'], 'localized_options' => array('attributes' => array('class' => array('edit_view-edit-toggle', 'edit-view')))),
+          '#active' => TRUE,
+        ),
+        array(
+          '#theme' => 'menu_local_task',
+          '#link' => array('title' => t('Quick edit'), 'href' => '#', 'localized_options' => array('attributes' => array('class' => array('edit_view-edit-toggle', 'edit-edit')))),
+        ),
+      ),
+      '#attached' => array(
+        'library' => array(
+          array('edit', 'edit'),
+        ),
+      ),
+    ),
+    '#post_render' => array(
+      'edit_editbar_post_render',
+    ),
+  );
+}
+
+/**
+ * Post-render function to remove the editbar if nothing editable is present.
+ */
+function edit_editbar_post_render($html) {
+  global $editbar;
+  return ($editbar !== TRUE) ? '' : $html;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function edit_theme() {
+  return array(
+    'edit_spanned_field' => array(
+      'file' => 'includes/theme.inc',
+      'variables' => array(
+        'value' => NULL,
+        'edit_id' => NULL,
+        'label' => NULL,
+        'attributes' => array(),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_library().
+ */
+function edit_library() {
+  // Figure out which library dependency to set for WYSIWYG editor integration.
+  $wysiwyg_module = variable_get(EDIT_WYSIWYG_VARIABLE, EDIT_WYSIWYG_DEFAULT);
+
+  $path = drupal_get_path('module', 'edit');
+  $libraries['edit'] = array(
+    'title' => 'Edit: in-place editing',
+    'website' => 'http://drupal.org/project/edit',
+    'version' => NULL, // @TODO Figure out the correct way to do this.
+    'js' => array(
+      $path . '/js/edit.js' => array(
+        // @TODO Make sure that a subset of the JavaScript is loaded ASAP, so
+        // that the view/edit mode toggle works immediately.
+        'defer' => TRUE,
+      ),
+      $path . '/js/util.js' => array(
+        'defer' => TRUE,
+      ),
+      $path . '/js/ui.js' => array(
+        'defer' => TRUE,
+      ),
+      $path . '/js/ui-editables.js' => array(
+        'defer' => TRUE,
+      ),
+      $path . '/js/theme.js' => array(
+        'defer' => TRUE,
+      ),
+      $path . '/js/ajax.js' => array(
+        'defer' => TRUE,
+      ),
+      // Basic settings.
+      array(
+        'data' => array('edit' => array(
+          'fieldFormURL' => url('admin/edit/field/!entity_type/!id/!field_name'),
+          'rerenderProcessedTextURL' => url('admin/render-without-transformations/field/!entity_type/!id/!field_name'),
+          'context' => 'body',
+        )),
+        'type' => 'setting',
+      ),
+    ),
+    'css' => array(
+      $path . '/css/edit.css',
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.form'),
+      array('system', 'drupal.form'),
+      array('system', 'drupal.ajax'),
+    ),
+  );
+
+  // Only add dependencies on the WYSIWYG editor when it's actually available.
+  if (module_exists($wysiwyg_module)) {
+    $libraries['edit']['dependencies'][] = array($wysiwyg_module, "$wysiwyg_module.edit");
+  }
+
+  return $libraries;
+}
+
+/**
+ * Implements hook_field_attach_view_alter().
+ */
+function edit_field_attach_view_alter(&$output, $context) {
+  if (!module_exists('filter_true_wysiwyg')) {
+    return;
+  }
+
+  // Special case for this special mode.
+  if ($context['display'] == 'edit-render-without-transformation-filters') {
+    $field = reset(element_children($output));
+    $langcode = $output[$field]['#language'];
+    foreach (array_keys($output[$field]['#items']) as $item) {
+      $text      = $output[$field]['#items'][$item]['value'];
+      $format_id = $output[$field]['#items'][$item]['format'];
+      $wrapped_and_untransformed = check_markup2($text, $format_id, $langcode, FALSE, array(FILTER_TYPE_TRANSFORM_DOM, FILTER_TYPE_TRANSFORM_TEXT));
+      $output[$field][$item]['#markup'] = $wrapped_and_untransformed;
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Simplifies simple field forms that contain only one form item by hiding the
+ * form element title (which is already displayed in the toolbar).
+ */
+function edit_form_fape_field_edit_form_alter(&$form, &$form_state) {
+  // Only alter this form when it's being built by the Edit module.
+  if (empty($form_state['editability'])) {
+    return;
+  }
+
+  $elements = element_children($form);
+
+  // Required internal form properties.
+  $internal_elements = array('actions', 'form_build_id', 'form_token', 'form_id');
+
+  // Calculate the remaining form elements.
+  $remaining_elements = array_diff($elements, $internal_elements);
+
+  // Only simplify the form if there is a single element remaining.
+  if (count($remaining_elements) === 1) {
+    $element = $remaining_elements[0];
+
+    if ($form[$element]['#type'] == 'container') {
+      $language = $form[$element]['#language'];
+      $children = element_children($form[$element][$language]);
+
+      // Certain fields require different processing depending on the form
+      // structure.
+      if (count($children) == 0) {
+        // Checkbox elements don't have a title.
+        if ($form[$element][$language]['#type'] != 'checkbox') {
+          $form[$element][$language]['#title_display'] = 'invisible';
+        }
+      }
+      elseif (count($children) == 1) {
+        $form[$element][$language][0]['value']['#title_display'] = 'invisible';
+
+        // UX improvement: make the number of rows of textarea form elements
+        // fit the content. (i.e. no wads of whitespace)
+        if (isset($form[$element][$language][0]['value']['#type'])
+            && $form[$element][$language][0]['value']['#type'] == 'textarea')
+        {
+          $lines = count(explode("\n", $form[$element][$language][0]['value']['#default_value']));
+          $form[$element][$language][0]['value']['#rows'] = $lines + 1;
+        }
+      }
+    }
+
+    // Handle pseudo-fields that are language-independent, such as title,
+    // author, and creation date.
+    elseif (empty($form[$element]['#language'])) {
+      $form[$element]['#title_display'] = 'invisible';
+    }
+  }
+
+  // Make it easy for the JavaScript to identify the submit button.
+  $form['actions']['submit']['#attributes'] = array('class' => array('edit-form-submit'));
+}
+
+/**
+ * Implements hook_field_formatter_info_alter().
+ */
+function edit_field_formatter_info_alter(&$info) {
+  // @todo Create a UI that allows users to override these defaults.
+
+  // Add a new "edit" property to each formatter, which contains metadata for
+  // the Edit module depending on the formatter. It contains the following keys:
+  //   * 'editability', with one of the following values:
+  //     - 'editable': these fields will be immediately editable.
+  //     - 'form': these fields will load the field's form through AJAX.
+  //     - 'disabled': these fields will not be editable inline.
+  //   * 'wysiwyg', with boolean values
+  $editability_metadata = array(
+    // @todo Implement file and image editability.
+    'file_default'   => 'form',
+    'file_table'     => 'form',
+    'file_url_plain' => 'disabled',
+    'image'          => 'form',
+    'list_default'   => 'form',
+    'list_key'       => 'form',
+    'number_integer'     => 'form',
+    'number_decimal'     => 'form',
+    'number_unformatted' => 'form',
+    'taxonomy_term_reference_link'         => 'form',
+    'taxonomy_term_reference_plain'        => 'form',
+    'taxonomy_term_reference_rss_category' => 'disabled',
+    'text_default'            => 'direct',
+    'text_plain'              => 'form',
+    'text_trimmed'            => 'disabled',
+    'text_summary_or_trimmed' => 'disabled',
+    'text_textarea'           => 'direct',
+  );
+  $wysiwyg_metadata = array(
+    'text_default' => TRUE,
+    'text_plain' => FALSE,
+  );
+  foreach ($editability_metadata as $formatter => $editability) {
+    if (!empty($info[$formatter])) {
+      $info[$formatter]['settings']['edit'] = array(
+        'editability' => $editability,
+        'wysiwyg'     => (isset($wysiwyg_metadata[$formatter])) ? $wysiwyg_metadata[$formatter] : FALSE,
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_panels_pane().
+ */
+function edit_preprocess_panels_pane(&$variables) {
+  // If we don't have a node object to work with, return early to avoid
+  // processing.
+  // Note: This convoluted check is required because the expression
+  // $variables['content']['#node'] is being interpreted as "the first character
+  // of the string in $variables['content']" in panes that contain 'content' as
+  // a string, rather than an array. Bleh.
+  if (!isset($variables['content']['#node']) || !is_object($variables['content']['#node'])) {
+    return;
+  }
+
+  $node = $variables['content']['#node'];
+
+  // Ensure the user has access to update the node.
+  if (entity_access('update', 'node', $node)) {
+    // Make sure the editbar is created.
+    global $editbar;
+    $editbar = TRUE;
+
+    $node_type = node_type_get_type($node->type);
+    if ($node_type->has_title) {
+      $variables['title_attributes_array']['class'][] = 'edit-pseudofield';
+      $variables['title_attributes_array']['class'][] = 'edit-field';
+      $variables['title_attributes_array']['class'][] = 'edit-allowed';
+      $variables['title_attributes_array']['class'][] = 'edit-type-direct';
+      $variables['title_attributes_array']['data-edit-field-label'] = $node_type->title_label;
+      $variables['title_attributes_array']['data-edit-id'] = "node:$node->nid:title";
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function edit_preprocess_page(&$variables) {
+  // If we don't have a node object to work with, return early to avoid
+  // processing.
+  if (empty($variables['node'])) {
+    return;
+  }
+
+  $node = $variables['node'];
+
+  // Ensure the user has access to update the node.
+  if (entity_access('update', 'node', $node)) {
+    // On full node pages the title of the node becomes the page title so we
+    // must handle it differently. In this case, we add a wrapper around the
+    // title with the required attributes to enable editability.
+    $node_type = node_type_get_type($node->type);
+
+    if ($node_type->has_title) {
+      // Make sure the editbar is created.
+      global $editbar;
+      $editbar = TRUE;
+
+      $attributes = array(
+        'class' => array(
+          'edit-pseudofield',
+          'edit-field',
+          'edit-allowed',
+          'edit-type-direct',
+        ),
+        'data-edit-field-label' => $node_type->title_label,
+        'data-edit-id' => 'node:' . $node->nid . ':title',
+      );
+      $variables['title_prefix']['edit']['#markup'] = '<div' . drupal_attributes($attributes) . '>';
+      $variables['title_suffix']['edit']['#markup'] = '</div>';
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_node().
+ */
+function edit_preprocess_node(&$variables) {
+  $entity_type = $variables['elements']['#entity_type'];
+  $entity      = $variables['elements']['#node'];
+
+  if (entity_access('update', $entity_type, $entity)) {
+    // Make sure the editbar is created.
+    global $editbar;
+    $editbar = TRUE;
+
+    list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+
+    // Pseudo-field: title.
+    $node_type = node_type_get_type($bundle);
+    if ($node_type->has_title) {
+      $variables['title_attributes_array']['class'][] = 'edit-pseudofield';
+      $variables['title_attributes_array']['class'][] = 'edit-field';
+      $variables['title_attributes_array']['class'][] = 'edit-allowed';
+      $variables['title_attributes_array']['class'][] = 'edit-type-direct';
+      $variables['title_attributes_array']['data-edit-field-label'] = $node_type->title_label;
+      $variables['title_attributes_array']['data-edit-id'] = "node:$id:title";
+    }
+
+    // Pseudo-fields: author (name) and created date (authoring date).
+    if ($variables['display_submitted']) {
+      $variables['name'] = edit_node_wrap_name($variables['name'], $id);
+      $variables['date'] = edit_node_wrap_date($variables['date'], $id);
+      $variables['submitted'] = edit_node_render_submitted($variables['name'], $variables['date']);
+    }
+  }
+}
+
+/**
+ * Wraps the name pseudo-field attached to nodes.
+ *
+ * @param $name
+ *   The existing name value.
+ * @param $node_id
+ *   The node ID.
+ *
+ * @return
+ *   The fully-themed HTML output for the wrapped "name" pseudo-field.
+ */
+function edit_node_wrap_name($name, $node_id) {
+  return theme('edit_spanned_field', array(
+    'value' => $name,
+    'label' => t('Author'),
+    'edit_id' => "node:$node_id:author",
+    'attributes' => array(
+      'class' => array(
+        'edit-pseudofield',
+        'edit-field',
+        'edit-allowed',
+        'edit-type-form',
+      ),
+    ),
+  ));
+}
+
+/**
+ * Wraps the "date" pseudo-field attached to nodes.
+ *
+ * @param $date
+ *   The existing date value.
+ * @param $node_id
+ *   The node ID.
+ *
+ * @return
+ *   The fully-themed HTML output for the wrapped "date" pseudo-field.
+ */
+function edit_node_wrap_date($date, $node_id) {
+  return theme('edit_spanned_field', array(
+    'value' => $date,
+    'label' => t('Authoring date'),
+    'edit_id' => "node:$node_id:created",
+    'attributes' => array(
+      'class' => array(
+        'edit-pseudofield',
+        'edit-field',
+        'edit-allowed',
+        'edit-type-form',
+      ),
+    ),
+  ));
+}
+
+/**
+ * Renders the author and created date pseudo-fields.
+ */
+function edit_node_render_submitted($author, $created) {
+  // @todo Consider using template_preprocess_node() or theme_preprocess_node()
+  // instead so this may be more easily overridden.
+  return t(
+    'Submitted by !username on !datetime',
+    array('!username' => $author, '!datetime' => $created)
+  );
+}
+
+/**
+ * Implements hook_preprocess_field().
+ */
+function edit_preprocess_field(&$variables) {
+  $entity_type = $variables['element']['#entity_type'];
+  $entity      = $variables['element']['#object'];
+  $field_name  = $variables['element']['#field_name'];
+  $formatter   = $variables['element']['#formatter'];
+
+  $formatter_info = field_info_formatter_types($formatter);
+
+  // If the formatter doesn't contain the edit property, assume that it is not
+  // yet compatible with the Edit module and return early.
+  if (empty($formatter_info['settings']['edit']['editability'])) {
+    return;
+  }
+
+  $editability = $formatter_info['settings']['edit']['editability'];
+  $wysiwyg     = $formatter_info['settings']['edit']['wysiwyg'];
+
+  // If editing is explicitly disabled for this field, return early to avoid
+  // any further processing.
+  if ($editability == 'disabled') {
+    return;
+  }
+
+  // If directly editable, check the cardinality. If the cardinality is greater
+  // than 1, use a form to edit the field.
+  if ($editability == 'direct') {
+    $field_info = field_info_field($field_name);
+    if ($field_info['cardinality'] != 1) {
+      $editability = 'form';
+    }
+  }
+
+  // Only perform the necessary checks (in the next if-test) to see whether
+  // direct, WYSIWYG-based editing is possible if the filter_true_wysiwyg module
+  // and the indicated WYSIWYG module are installed.
+  if ($editability == 'direct' && $wysiwyg) {
+    $wysiwyg_module = variable_get(EDIT_WYSIWYG_VARIABLE, EDIT_WYSIWYG_DEFAULT);
+    if (module_exists('filter_true_wysiwyg') && !module_exists($wysiwyg_module)) {
+      $editability = 'form';
+    }
+  }
+
+  // If still directly editable and the formatter is marked to support WYSIWYG,
+  // then check whether we can actually use WYSIWYG.
+  if ($editability == 'direct' && $wysiwyg) {
+    $field     = $variables['element']['#object']->$field_name;
+    $language  = $variables['element']['#language'];
+    $format_id = $field[$language][0]['format'];
+
+    // Update the editability based on the field's settings and the text format.
+    module_load_include('inc', 'edit', 'includes/wysiwyg');
+    $editability = edit_wysiwyg_analyze_field_editability($entity_type, $entity, $field_name, $format_id);
+    if ($editability == 'disabled') {
+      return;
+    }
+  }
+
+  $entity_access = entity_access('update', $entity_type, $entity);
+  $field_access = field_access('edit', $field_name, $entity_type, $entity);
+  if ($entity_access && $field_access) {
+    // Make sure the editbar is created.
+    global $editbar;
+    $editbar = TRUE;
+
+    list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+
+    $instance_info = field_info_instance($entity_type, $field_name, $bundle);
+
+    if (empty($variables['attributes_array'])) {
+      $variables['attributes_array'] = array();
+    }
+
+    // Provide metadata through data- attributes.
+    $variables['attributes_array']['data-edit-field-label'] = $instance_info['label'];
+    $variables['attributes_array']['data-edit-id'] = "$entity_type:$id:$field_name";
+    if ($editability == 'direct' && $wysiwyg) {
+      $field     = $variables['element']['#object']->$field_name;
+      $language  = $variables['element']['#language'];
+      $format_id = $field[$language][0]['format'];
+
+      // Let the WYSIWYG editor know the allowed tags.
+      $allowed_tags = filter_get_allowed_tags_by_format($format_id);
+      $variables['attributes_array']['data-allowed-tags'] = ($allowed_tags === TRUE) ? '' : implode(',', $allowed_tags);
+
+      // Let the JavaScript logic know whether transformation filters are used
+      // in this format, so it can decide whether to re-render the text or not.
+      $filter_types = filter_get_filter_types_by_format($format_id);
+      if (count(array_intersect(array(FILTER_TYPE_TRANSFORM_DOM, FILTER_TYPE_TRANSFORM_TEXT), $filter_types))) {
+        $variables['classes_array'][] = 'edit-text-with-transformation-filters';
+      }
+      else {
+        $variables['classes_array'][] = 'edit-text-without-transformation-filters';
+      }
+    }
+    // Mark this field as editable.
+    $variables['classes_array'][] = 'edit-field';
+    $variables['classes_array'][] = 'edit-allowed';
+    $variables['classes_array'][] = 'edit-type-' . $editability;
+    if ($editability == 'direct' && $wysiwyg) {
+      $variables['classes_array'][] = 'edit-type-direct-with-wysiwyg';
+    }
+  }
+}

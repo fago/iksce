@@ -1,0 +1,24 @@
+INSTALL
+-------
+
+Installing JSON-LD is much quicker if you use drush: http://drupal.org/project/drush
+which will download the right library for you. All you have to do is to run:
+drush en -y jsonld
+
+If you prefer to spend more time you can install it manually:
+
+1. Place the entire jsonld directory into your modules directory
+   (sites/all/modules is the usual location).
+2. Create a new folder for the php-json-ld library at:
+     cd YOUR-DRUPAL-ROOT
+     mkdir -p sites/all/libraries/php-json-ld
+3. Download php-json-ld from https://github.com/digitalbazaar/php-json-ld into
+   the libraries directory:
+     cd sites/all/libraries
+     curl -L -o php-json-ld.zip https://github.com/digitalbazaar/php-json-ld/zipball/master
+4. Unzip the contents of the zip file into sites/all/libraries/php-json-ld/php-json-ld/
+   so that jsonld.php is located in sites/all/libraries/php-json-ld/php-json-ld/:
+     unzip php-json-ld.zip
+     mv digitalbazaar-php-json-ld-2ff57e9 php-json-ld
+     mv php-json-ld/digitalbazaar-php-json-ld-2ff57e9/ php-json-ld/php-json-ld
+5. Go to Dashboard > Modules and enable the JSON-LD module.
