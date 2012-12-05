@@ -1,0 +1,59 @@
+<?php
+/**
+ * @file
+ * Provides basic hooks to include RestWS in Backbone module.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function backbone_restws_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#backbone_restws':
+      return t("Enable this module along with Backbone to include the RestWS-specific Backbone code in your site.  Once enabled, you'll need to specify this module as the chosen API backend to include.");
+  }
+}
+
+/**
+ * Implements hook_backbone_backends().
+ *
+ *
+ * @return Array
+ *   List with the name of the backend module as they key and
+ *   translated option name as the value.  The "backbone_init"
+ *   hook will be called on this module if it's chosen, when
+ *   backbone is to be included in a page by the settings.
+ */
+function backbone_restws_backbone_backends() {
+  return array(
+    'backbone_restws' => t('RestWS'),
+  );
+}
+
+/**
+ * Implements hook_library().
+ */
+function backbone_restws_library() {
+  $libraries['drupalbackbone-restws'] = array(
+    'title' => 'drupalbackbone-restws.js',
+    'website' => 'http://drupal.org/project/backbone',
+    'version' => '0.0.1',
+    'js' => array(
+      drupal_get_path('module', 'backbone_restws') . '/js/drupalbackbone-restws.js' => array(),
+    ),
+    'dependencies' => array(
+      array('backbone', 'drupalbackbone'),
+    ),
+  );
+  return $libraries;
+}
+
+/**
+ * Implements hook_backbone_attach().
+ *
+ * This function can also be called directly in a module if you
+ * want to use backbone in your module on specific pages.
+ */
+function backbone_restws_backbone_attach() {
+  drupal_add_library('backbone_restws', 'drupalbackbone-restws');
+}

@@ -1,0 +1,464 @@
+<html><head><meta http-equiv="content-type" content="text/html; charset=utf8"> <style>
+	.KEYW {color: #933;}
+	.COMM {color: #bbb; font-style: italic;}
+	.NUMB {color: #393;}
+	.STRN {color: #393;}
+	.REGX {color: #339;}
+	.line {border-right: 1px dotted #666; color: #666; font-style: normal;}
+	</style></head><body><pre><span class='line'>  1</span> <span class="COMM">/* ephemera.js is part of Aloha Editor project http://aloha-editor.org
+<span class='line'>  2</span>  *
+<span class='line'>  3</span>  * Aloha Editor is a WYSIWYG HTML5 inline editing library and editor. 
+<span class='line'>  4</span>  * Copyright (c) 2010-2012 Gentics Software GmbH, Vienna, Austria.
+<span class='line'>  5</span>  * Contributors http://aloha-editor.org/contribution.php 
+<span class='line'>  6</span>  * 
+<span class='line'>  7</span>  * Aloha Editor is free software; you can redistribute it and/or
+<span class='line'>  8</span>  * modify it under the terms of the GNU General Public License
+<span class='line'>  9</span>  * as published by the Free Software Foundation; either version 2
+<span class='line'> 10</span>  * of the License, or any later version.
+<span class='line'> 11</span>  *
+<span class='line'> 12</span>  * Aloha Editor is distributed in the hope that it will be useful,
+<span class='line'> 13</span>  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+<span class='line'> 14</span>  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+<span class='line'> 15</span>  * GNU General Public License for more details.
+<span class='line'> 16</span>  *
+<span class='line'> 17</span>  * You should have received a copy of the GNU General Public License
+<span class='line'> 18</span>  * along with this program; if not, write to the Free Software
+<span class='line'> 19</span>  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+<span class='line'> 20</span>  * 
+<span class='line'> 21</span>  * As an additional permission to the GNU GPL version 2, you may distribute
+<span class='line'> 22</span>  * non-source (e.g., minimized or compacted) forms of the Aloha-Editor
+<span class='line'> 23</span>  * source code without the copy of the GNU GPL normally required,
+<span class='line'> 24</span>  * provided you include this license notice and a URL through which
+<span class='line'> 25</span>  * recipients can access the Corresponding Source.
+<span class='line'> 26</span>  */</span><span class="WHIT">
+<span class='line'> 27</span> </span><span class="COMM">/**
+<span class='line'> 28</span>  * Provides functions to mark the contents of editables as ephemeral. An
+<span class='line'> 29</span>  * editable's ephemeral content will be pruned before it is being
+<span class='line'> 30</span>  * returned by editable.getContents().
+<span class='line'> 31</span>  * 
+<span class='line'> 32</span>  * It is planned to replace most instances of makeClean() with this
+<span class='line'> 33</span>  * implementation for improved performance and more importantly, in
+<span class='line'> 34</span>  * order to have a centralized place that has the control over all
+<span class='line'> 35</span>  * ephemeral content, which can be leveraged by plugins to provide more
+<span class='line'> 36</span>  * advanced functionality.
+<span class='line'> 37</span>  *
+<span class='line'> 38</span>  * Some examples that would be possible:
+<span class='line'> 39</span>  * * a HTML source code text box, an interactive tree structure, or
+<span class='line'> 40</span>  *   other kind of DOM visualization, next to the editable, that
+<span class='line'> 41</span>  *   contains just the content of the editable (without ephemeral data)
+<span class='line'> 42</span>  *   and which is updated efficiently in real time after each keystroke.
+<span class='line'> 43</span>  *
+<span class='line'> 44</span>  * * change detection algorithms that are able to intelligently ignore
+<span class='line'> 45</span>  *   ephemeral data and which would not trigger unless non-ephemeral
+<span class='line'> 46</span>  *   data is added to the editable.
+<span class='line'> 47</span>  *
+<span class='line'> 48</span>  * * When a plugin provides very general functionality over all nodes of
+<span class='line'> 49</span>  *   the DOM, somtimes the plugin may not know what is and what isn't
+<span class='line'> 50</span>  *   supposed to be real content. The functionality provided here makes
+<span class='line'> 51</span>  *   it possible for the plugin to exaclty distinguish real content from
+<span class='line'> 52</span>  *   ephemeral content.
+<span class='line'> 53</span>  *
+<span class='line'> 54</span>  * TODO: currently only simple transformations are suppored, like
+<span class='line'> 55</span>  *       marking classes, attributes and elements as ephemeral and removing
+<span class='line'> 56</span>  *       them during the pruning process.
+<span class='line'> 57</span>  *       In the future, support for the block-plugin and custom pruning
+<span class='line'> 58</span>  *       functions should be added. This may be done by letting implementations
+<span class='line'> 59</span>  *       completely control the pruning of a DOM element through a
+<span class='line'> 60</span>  *       function that takes the content+ephemeral-data and returns only
+<span class='line'> 61</span>  *       content - similar to make clean, but for single elements to reduce
+<span class='line'> 62</span>  *       overhead.
+<span class='line'> 63</span>  */</span><span class="WHIT">
+<span class='line'> 64</span> </span><span class="NAME">define</span><span class="PUNC">(</span><span class="PUNC">[</span><span class="WHIT">
+<span class='line'> 65</span> </span><span class="WHIT">	</span><span class="STRN">'jquery'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 66</span> </span><span class="WHIT">	</span><span class="STRN">'aloha/core'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 67</span> </span><span class="WHIT">	</span><span class="STRN">'aloha/console'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 68</span> </span><span class="WHIT">	</span><span class="STRN">'util/strings'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 69</span> </span><span class="WHIT">	</span><span class="STRN">'util/trees'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 70</span> </span><span class="WHIT">	</span><span class="STRN">'util/arrays'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 71</span> </span><span class="WHIT">	</span><span class="STRN">'util/maps'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 72</span> </span><span class="WHIT">	</span><span class="STRN">'util/dom2'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 73</span> </span><span class="WHIT">	</span><span class="STRN">'util/functions'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 74</span> </span><span class="WHIT">	</span><span class="STRN">'util/misc'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 75</span> </span><span class="WHIT">	</span><span class="STRN">'PubSub'</span><span class="WHIT">
+<span class='line'> 76</span> </span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="WHIT">
+<span class='line'> 77</span> </span><span class="WHIT">	</span><span class="NAME">$</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 78</span> </span><span class="WHIT">	</span><span class="NAME">Aloha</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 79</span> </span><span class="WHIT">	</span><span class="NAME">console</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 80</span> </span><span class="WHIT">	</span><span class="NAME">Strings</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 81</span> </span><span class="WHIT">	</span><span class="NAME">Trees</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 82</span> </span><span class="WHIT">	</span><span class="NAME">Arrays</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 83</span> </span><span class="WHIT">	</span><span class="NAME">Maps</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 84</span> </span><span class="WHIT">	</span><span class="NAME">Dom</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 85</span> </span><span class="WHIT">	</span><span class="NAME">Functions</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 86</span> </span><span class="WHIT">	</span><span class="NAME">Misc</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 87</span> </span><span class="WHIT">	</span><span class="NAME">PubSub</span><span class="WHIT">
+<span class='line'> 88</span> </span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 89</span> </span><span class="WHIT">	</span><span class="STRN">'use strict'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 90</span> 
+<span class='line'> 91</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">ephemeraMap</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 92</span> </span><span class="WHIT">		</span><span class="NAME">classMap</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 93</span> </span><span class="WHIT">			</span><span class="STRN">'aloha-cleanme'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 94</span> </span><span class="WHIT">			</span><span class="STRN">'aloha-ui-wrapper'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 95</span> </span><span class="WHIT">			</span><span class="STRN">'aloha-ui-filler'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 96</span> </span><span class="WHIT">			</span><span class="STRN">'aloha-ui-attr'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="WHIT">
+<span class='line'> 97</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 98</span> </span><span class="WHIT">		</span><span class="NAME">attrMap</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 99</span> </span><span class="WHIT">			</span><span class="STRN">'hidefocus'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>100</span> </span><span class="WHIT">			</span><span class="STRN">'hideFocus'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>101</span> </span><span class="WHIT">			</span><span class="STRN">'tabindex'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>102</span> </span><span class="WHIT">			</span><span class="STRN">'tabIndex'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>103</span> </span><span class="WHIT">			</span><span class="STRN">'TABLE.contenteditable'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>104</span> </span><span class="WHIT">			</span><span class="STRN">'TABLE.contentEditable'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="WHIT">
+<span class='line'>105</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>106</span> </span><span class="WHIT">		</span><span class="NAME">attrRxs</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="REGX">/^(?:nodeIndex|sizcache|sizset|jquery)[\w\d]*$/i</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>107</span> </span><span class="WHIT">		</span><span class="NAME">pruneFns</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="WHIT">
+<span class='line'>108</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>109</span> 
+<span class='line'>110</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">commonClsSubstr</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'aloha-'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>111</span> 
+<span class='line'>112</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>113</span> 	 * Checks whether the given classes contain the substring common to
+<span class='line'>114</span> 	 * all ephemeral classes. If the check fails, an warning will be
+<span class='line'>115</span> 	 * logged and the substring will be set to the empty string which
+<span class='line'>116</span> 	 * voids the performance improvement the common substring would
+<span class='line'>117</span> 	 * otherwise have gained.
+<span class='line'>118</span> 	 */</span><span class="WHIT">
+<span class='line'>119</span> </span><span class="WHIT">	</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">checkCommonSubstr</span><span class="PUNC">(</span><span class="NAME">clss</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>120</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">len</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>121</span> </span><span class="WHIT">		</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">len</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">clss.length</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">&lt;</span><span class="WHIT"> </span><span class="NAME">len</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>122</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NAME">clss</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">indexOf</span><span class="PUNC">(</span><span class="NAME">commonClsSubstr</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>123</span> </span><span class="WHIT">				</span><span class="NAME">console.warn</span><span class="PUNC">(</span><span class="STRN">'Class "'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">clss</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'" was set to be ephemeral,'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'which hurts peformance.'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">' Add the common substring "'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">commonClsSubstr</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'" to the class to fix this problem.'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>124</span> </span><span class="WHIT">				</span><span class="NAME">commonClsSubstr</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>125</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>126</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>127</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>128</span> 
+<span class='line'>129</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>130</span> 	 * Registers ephemeral classes.
+<span class='line'>131</span> 	 *
+<span class='line'>132</span> 	 * An ephemeral class is a non-content class that will be pruned
+<span class='line'>133</span> 	 * from the from the result of editable.getContents().
+<span class='line'>134</span> 	 *
+<span class='line'>135</span> 	 * The given classes should contain the string 'aloha-' to get the
+<span class='line'>136</span> 	 * benefit of a performance optimization.
+<span class='line'>137</span> 	 *
+<span class='line'>138</span> 	 * Returns a map that contains all classes that were ever registered
+<span class='line'>139</span> 	 * with this function.
+<span class='line'>140</span> 	 *
+<span class='line'>141</span> 	 * Multiple classes may be specified. If none are specified, just
+<span class='line'>142</span> 	 * returns the current ephemeral classes map without modifying it.
+<span class='line'>143</span> 	 *
+<span class='line'>144</span> 	 * Also see ephemera().
+<span class='line'>145</span> 	 */</span><span class="WHIT">
+<span class='line'>146</span> </span><span class="WHIT">	</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">classes</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>147</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">clss</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">Array.prototype.slice.call</span><span class="PUNC">(</span><span class="NAME">arguments</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>148</span> </span><span class="WHIT">		</span><span class="NAME">Maps.fillKeys</span><span class="PUNC">(</span><span class="NAME">ephemeraMap.classMap</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">clss</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>149</span> </span><span class="WHIT">		</span><span class="NAME">checkCommonSubstr</span><span class="PUNC">(</span><span class="NAME">clss</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>150</span> </span><span class="WHIT">		</span><span class="NAME">PubSub.pub</span><span class="PUNC">(</span><span class="STRN">'aloha.ephemera.classes'</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>151</span> </span><span class="WHIT">			</span><span class="NAME">ephemera</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">ephemeraMap</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>152</span> </span><span class="WHIT">			</span><span class="NAME">newClasses</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">clss</span><span class="WHIT">
+<span class='line'>153</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>154</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>155</span> 
+<span class='line'>156</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>157</span> 	 * Registers ephemeral attributes by attribute name.
+<span class='line'>158</span> 	 *
+<span class='line'>159</span> 	 * Similar to classes() except applies to entire attributes instead
+<span class='line'>160</span> 	 * of individual classes in the class attribute.
+<span class='line'>161</span> 	 */</span><span class="WHIT">
+<span class='line'>162</span> </span><span class="WHIT">	</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">attributes</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>163</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">attrs</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">Array.prototype.slice.call</span><span class="PUNC">(</span><span class="NAME">arguments</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>164</span> </span><span class="WHIT">		</span><span class="NAME">Maps.fillKeys</span><span class="PUNC">(</span><span class="NAME">ephemeraMap.attrMap</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">attrs</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>165</span> </span><span class="WHIT">		</span><span class="NAME">PubSub.pub</span><span class="PUNC">(</span><span class="STRN">'aloha.ephemera.attributes'</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>166</span> </span><span class="WHIT">			</span><span class="NAME">ephemera</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">ephemeraMap</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>167</span> </span><span class="WHIT">			</span><span class="NAME">newAttributes</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">attrs</span><span class="WHIT">
+<span class='line'>168</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>169</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>170</span> 
+<span class='line'>171</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>172</span> 	 * Merges a map containing values to identify ephemeral content into
+<span class='line'>173</span> 	 * a global registry.
+<span class='line'>174</span> 	 *
+<span class='line'>175</span> 	 * The given map may have the following entries
+<span class='line'>176</span> 	 * classMap - a map from class name to the value true
+<span class='line'>177</span> 	 * attrMap  - a map from attribute name to the value true; attribute
+<span class='line'>178</span> 	 *            names may be optionally prefixed with "ELEMENT.",
+<span class='line'>179</span> 	 *            where ELEMENT is the name of an element in uppercase,
+<span class='line'>180</span> 	 *            to prune only from specific elements. An element name prefix
+<span class='line'>181</span> 	 *            should always be specified if it is known, and if
+<span class='line'>182</span> 	 *            multiple are known, multiple entries with separate
+<span class='line'>183</span> 	 *            element prefixes should be made instead of a single
+<span class='line'>184</span> 	 *            entry without - preserve information for refactoring.
+<span class='line'>185</span> 	 * attrRxs  - an array of regexes in object form (/[a-z].../ and not "[a-z]...")
+<span class='line'>186</span> 	 * pruneFns - an array of functions that will be called at each pruning step.
+<span class='line'>187</span> 	 *
+<span class='line'>188</span> 	 * Returns the global registry, which has the same structure as above.
+<span class='line'>189</span> 	 *
+<span class='line'>190</span> 	 * When a DOM tree is pruned with prune(elem) without an emap
+<span class='line'>191</span> 	 * argument, the global registry maintained with classes()
+<span class='line'>192</span> 	 * attributes() and ephemera() is used as a default map. If an emap
+<span class='line'>193</span> 	 * argument is specified, the global registry will be ignored and
+<span class='line'>194</span> 	 * the emap argument will be used instead.
+<span class='line'>195</span> 	 *
+<span class='line'>196</span> 	 * When a DOM tree is pruned with prune()
+<span class='line'>197</span> 	 * * classes specified by classMap will be removed
+<span class='line'>198</span> 	 * * attributes specified by attrMap or attrRxs will be removed
+<span class='line'>199</span> 	 * * functions specified by pruneFns will be called as the DOM tree
+<span class='line'>200</span> 	 *   is descended into (pre-order), with each node (element, text,
+<span class='line'>201</span> 	 *   etc.) as a single argument. The function is free to modify the
+<span class='line'>202</span> 	 *   element and return it, or return a new element which will
+<span class='line'>203</span> 	 *   replace the given element in the pruned tree. If null or
+<span class='line'>204</span> 	 *   undefined is returned, the element will be removed from the
+<span class='line'>205</span> 	 *   tree. As per contract of Maps.walkDomInplace, it is allowed to
+<span class='line'>206</span> 	 *   insert/remove children in the parent node as long as the given
+<span class='line'>207</span> 	 *   node is not removed.
+<span class='line'>208</span> 	 *
+<span class='line'>209</span> 	 * Also see classes() and attributes().
+<span class='line'>210</span> 	 *
+<span class='line'>211</span> 	 * Note that removal of attributes doesn't always work on IE7 (in
+<span class='line'>212</span> 	 * rare special cases). The dom-to-xhtml plugin can reliably remove
+<span class='line'>213</span> 	 * ephemeral attributes during the serialization step.
+<span class='line'>214</span> 	 */</span><span class="WHIT">
+<span class='line'>215</span> </span><span class="WHIT">	</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">ephemera</span><span class="PUNC">(</span><span class="NAME">emap</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>216</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">emap</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>217</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">emap.classMap</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>218</span> </span><span class="WHIT">				</span><span class="NAME">$.extend</span><span class="PUNC">(</span><span class="NAME">ephemeraMap.classMap</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">emap.classMap</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>219</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>220</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">emap.attrMap</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>221</span> </span><span class="WHIT">				</span><span class="NAME">$.extend</span><span class="PUNC">(</span><span class="NAME">ephemeraMap.attrMap</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">emap.attrMap</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>222</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>223</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">emap.attrRxs</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>224</span> </span><span class="WHIT">				</span><span class="NAME">ephemeraMap.attrRxs</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">ephemeraMap.attrRxs.concat</span><span class="PUNC">(</span><span class="NAME">emap.attrRxs</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>225</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>226</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">emap.pruneFns</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>227</span> </span><span class="WHIT">				</span><span class="NAME">ephemeraMap.pruneFns</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">ephemeraMap.pruneFns.concat</span><span class="PUNC">(</span><span class="NAME">emap.pruneFns</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>228</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>229</span> </span><span class="WHIT">			</span><span class="NAME">PubSub.pub</span><span class="PUNC">(</span><span class="STRN">'aloha.ephemera'</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>230</span> </span><span class="WHIT">				</span><span class="NAME">ephemera</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">ephemeraMap</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>231</span> </span><span class="WHIT">				</span><span class="NAME">newEphemera</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">emap</span><span class="WHIT">
+<span class='line'>232</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>233</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>234</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">ephemeraMap</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>235</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>236</span> 
+<span class='line'>237</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>238</span> 	 * Marks an element as ephemeral.
+<span class='line'>239</span> 	 *
+<span class='line'>240</span> 	 * The element will be completely removed when the prune function is
+<span class='line'>241</span> 	 * called on it.
+<span class='line'>242</span> 	 */</span><span class="WHIT">
+<span class='line'>243</span> </span><span class="WHIT">	</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">markElement</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>244</span> </span><span class="WHIT">		</span><span class="NAME">$</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">addClass</span><span class="PUNC">(</span><span class="STRN">'aloha-cleanme'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>245</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>246</span> 
+<span class='line'>247</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>248</span> 	 * Marks the attribute of an element as ephemeral.
+<span class='line'>249</span> 	 *
+<span class='line'>250</span> 	 * The attribute will be removed from the element when the prune
+<span class='line'>251</span> 	 * function is called on it.
+<span class='line'>252</span> 	 *
+<span class='line'>253</span> 	 * Multiple attributes can be passed at the same time be separating
+<span class='line'>254</span> 	 * them with a space.
+<span class='line'>255</span> 	 */</span><span class="WHIT">
+<span class='line'>256</span> </span><span class="WHIT">	</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">markAttribute</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">attr</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>257</span> </span><span class="WHIT">		</span><span class="NAME">elem</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">$</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>258</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">data</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">elem.attr</span><span class="PUNC">(</span><span class="STRN">'data-aloha-ui-attr'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>259</span> </span><span class="WHIT">		</span><span class="NAME">data</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">null</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="NAME">data</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="STRN">''</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NAME">data</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="NAME">attr</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">data</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">' '</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">attr</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>260</span> </span><span class="WHIT">		</span><span class="NAME">elem.attr</span><span class="PUNC">(</span><span class="STRN">'data-aloha-ui-attr'</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">data</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>261</span> </span><span class="WHIT">		</span><span class="NAME">elem.addClass</span><span class="PUNC">(</span><span class="STRN">'aloha-ui-attr'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>262</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>263</span> 
+<span class='line'>264</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>265</span> 	 * Marks an element as a ephemeral, excluding subnodes.
+<span class='line'>266</span> 	 *
+<span class='line'>267</span> 	 * The element will be removed when the prune function is called on
+<span class='line'>268</span> 	 * it, but any children of the wrapper element will remain in its
+<span class='line'>269</span> 	 * place.
+<span class='line'>270</span> 	 *
+<span class='line'>271</span> 	 * A wrapper is an element that wraps a single non-ephemeral
+<span class='line'>272</span> 	 * element. A filler is an element that is wrapped by a single
+<span class='line'>273</span> 	 * non-ephemeral element. This distinction is not important for the
+<span class='line'>274</span> 	 * prune function, which behave the same for both wrappers and
+<span class='line'>275</span> 	 * fillers, but it makes it easier to build more advanced content
+<span class='line'>276</span> 	 * inspection algorithms (also see note at the header of ephemeral.js).
+<span class='line'>277</span> 	 * 
+<span class='line'>278</span> 	 * NB: a wrapper element must not wrap a filler element. Wrappers
+<span class='line'>279</span> 	 *     and fillers are ephermeral. A wrapper must always wrap a
+<span class='line'>280</span> 	 *     single _non-ephemeral_ element, and a filler must always fill
+<span class='line'>281</span> 	 *     a single _non-ephemeral_ element.
+<span class='line'>282</span> 	 */</span><span class="WHIT">
+<span class='line'>283</span> </span><span class="WHIT">	</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">markWrapper</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>284</span> </span><span class="WHIT">		</span><span class="NAME">$</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">addClass</span><span class="PUNC">(</span><span class="STRN">'aloha-ui-wrapper'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>285</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>286</span> 
+<span class='line'>287</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>288</span> 	 * Marks an element as ephemeral, excluding subnodes.
+<span class='line'>289</span> 	 *
+<span class='line'>290</span> 	 * See wrapper()
+<span class='line'>291</span> 	 */</span><span class="WHIT">
+<span class='line'>292</span> </span><span class="WHIT">	</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">markFiller</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>293</span> </span><span class="WHIT">		</span><span class="NAME">$</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">addClass</span><span class="PUNC">(</span><span class="STRN">'aloha-ui-filler'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>294</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>295</span> 
+<span class='line'>296</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>297</span> 	 * Prunes attributes marked as ephemeral with Ephemera.attributes()
+<span class='line'>298</span> 	 * from the given element.
+<span class='line'>299</span> 	 */</span><span class="WHIT">
+<span class='line'>300</span> </span><span class="WHIT">	</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">pruneMarkedAttrs</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>301</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">$elem</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">$</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>302</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">data</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">$elem.attr</span><span class="PUNC">(</span><span class="STRN">'data-aloha-ui-attr'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>303</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>304</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">attrs</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>305</span> </span><span class="WHIT">		</span><span class="NAME">$elem.removeAttr</span><span class="PUNC">(</span><span class="STRN">'data-aloha-ui-attr'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>306</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">data</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'string'</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>307</span> </span><span class="WHIT">			</span><span class="NAME">attrs</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">Strings.words</span><span class="PUNC">(</span><span class="NAME">data</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>308</span> </span><span class="WHIT">			</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">&lt;</span><span class="WHIT"> </span><span class="NAME">attrs.length</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>309</span> <span class='line'>310</span> </span><span class="WHIT">				</span><span class="NAME">$elem.removeAttr</span><span class="PUNC">(</span><span class="NAME">attrs</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>311</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>312</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>313</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>314</span> 
+<span class='line'>315</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>316</span> 	 * Determines whether the given attribute of the given element is
+<span class='line'>317</span> 	 * ephemeral according to the given emap.
+<span class='line'>318</span> 	 * See Ephemera.ephemera() for an explanation of attrMap and attrRxs.
+<span class='line'>319</span> 	 */</span><span class="WHIT">
+<span class='line'>320</span> </span><span class="WHIT">	</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">isAttrEphemeral</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">attrName</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">attrMap</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">attrRxs</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>321</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">attrMap</span><span class="PUNC">[</span><span class="NAME">attrName</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">Misc.anyRx</span><span class="PUNC">(</span><span class="NAME">attrRxs</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">attrName</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">attrMap</span><span class="PUNC">[</span><span class="NAME">elem.nodeName</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'.'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">attrName</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>322</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>323</span> 
+<span class='line'>324</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>325</span> 	 * Prunes attributes specified with either emap.attrMap or emap.attrRxs.
+<span class='line'>326</span> 	 * See ephemera().
+<span class='line'>327</span> 	 */</span><span class="WHIT">
+<span class='line'>328</span> </span><span class="WHIT">	</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">pruneEmapAttrs</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">emap</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>329</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">$elem</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>330</span> </span><span class="WHIT">			</span><span class="NAME">attrs</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">Dom.attrNames</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>331</span> </span><span class="WHIT">		    </span><span class="NAME">name</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>332</span> </span><span class="WHIT">		    </span><span class="NAME">i</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>333</span> </span><span class="WHIT">		    </span><span class="NAME">len</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>334</span> </span><span class="WHIT">		</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">len</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">attrs.length</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">&lt;</span><span class="WHIT"> </span><span class="NAME">len</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>335</span> </span><span class="WHIT">			</span><span class="NAME">name</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">attrs</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>336</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">isAttrEphemeral</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">name</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">emap.attrMap</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">emap.attrRxs</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>337</span> </span><span class="WHIT">				</span><span class="NAME">$elem</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">$elem</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">$</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>338</span> </span><span class="WHIT">				</span><span class="NAME">$elem.removeAttr</span><span class="PUNC">(</span><span class="NAME">name</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>339</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>340</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>341</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>342</span> 
+<span class='line'>343</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>344</span> 	 * Prunes an element of attributes and classes or removes the
+<span class='line'>345</span> 	 * element by returning false.
+<span class='line'>346</span> 	 *
+<span class='line'>347</span> 	 * Elements attributes and classes can either be marked as
+<span class='line'>348</span> 	 * ephemeral, in which case the element itself will contain the
+<span class='line'>349</span> 	 * prune-info, or they can be specified as ephemeral with the given
+<span class='line'>350</span> 	 * emap.
+<span class='line'>351</span> 	 *
+<span class='line'>352</span> 	 * See ephemera() for an explanation of the emap argument.
+<span class='line'>353</span> 	 */</span><span class="WHIT">
+<span class='line'>354</span> </span><span class="WHIT">	</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">pruneElem</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">emap</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>355</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">className</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">elem.className</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>356</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">className</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="PUNC">-</span><span class="NUMB">1</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="NAME">className.indexOf</span><span class="PUNC">(</span><span class="NAME">commonClsSubstr</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>357</span> </span><span class="WHIT">			</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">classes</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">Strings.words</span><span class="PUNC">(</span><span class="NAME">className</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>358</span> 
+<span class='line'>359</span> </span><span class="WHIT">			</span><span class="COMM">// Ephemera.markElement()</span><span class="WHIT">
+<span class='line'>360</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="NAME">Arrays.indexOf</span><span class="PUNC">(</span><span class="NAME">classes</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'aloha-cleanme'</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>361</span> </span><span class="WHIT">				</span><span class="NAME">$.removeData</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="COMM">// avoids memory leak</span><span class="WHIT">
+<span class='line'>362</span> </span><span class="WHIT">				</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">false</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="COMM">// removes the element</span><span class="WHIT">
+<span class='line'>363</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>364</span> 
+<span class='line'>365</span> </span><span class="WHIT">			</span><span class="COMM">// Ephemera.markWrapper() and Ephemera.markFiller()</span><span class="WHIT">
+<span class='line'>366</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="NAME">Arrays.indexOf</span><span class="PUNC">(</span><span class="NAME">classes</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'aloha-ui-wrapper'</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="PUNC">-</span><span class="NUMB">1</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="NAME">Arrays.indexOf</span><span class="PUNC">(</span><span class="NAME">classes</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'aloha-ui-filler'</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>367</span> </span><span class="WHIT">				</span><span class="NAME">Dom.moveNextAll</span><span class="PUNC">(</span><span class="NAME">elem.parentNode</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">elem.firstChild</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">elem.nextSibling</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>368</span> </span><span class="WHIT">				</span><span class="NAME">$.removeData</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>369</span> </span><span class="WHIT">				</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">false</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>370</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>371</span> 
+<span class='line'>372</span> <span class='line'>373</span> </span><span class="WHIT">			</span><span class="COMM">// Ephemera.markAttribute()</span><span class="WHIT">
+<span class='line'>374</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="NAME">Arrays.indexOf</span><span class="PUNC">(</span><span class="NAME">classes</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'aloha-ui-attr'</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>375</span> </span><span class="WHIT">				</span><span class="NAME">pruneMarkedAttrs</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>376</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>377</span> 
+<span class='line'>378</span> </span><span class="WHIT">			</span><span class="COMM">// Ephemera.classes() and Ehpemera.ephemera({ classMap: {} })</span><span class="WHIT">
+<span class='line'>379</span> </span><span class="WHIT">			</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">persistentClasses</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">Arrays.filter</span><span class="PUNC">(</span><span class="NAME">classes</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">cls</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>380</span> </span><span class="WHIT">				</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">!</span><span class="NAME">emap.classMap</span><span class="PUNC">[</span><span class="NAME">cls</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>381</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>382</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">persistentClasses.length</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="NAME">classes.length</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>383</span> </span><span class="WHIT">				</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NUMB">0</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NAME">persistentClasses.length</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>384</span> </span><span class="WHIT">					</span><span class="COMM">// Removing the attributes is dangerous. Aloha has a</span><span class="WHIT">
+<span class='line'>385</span> </span><span class="WHIT">					</span><span class="COMM">// jquery patch in place to fix some issue.</span><span class="WHIT">
+<span class='line'>386</span> </span><span class="WHIT">					</span><span class="NAME">$</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">removeAttr</span><span class="PUNC">(</span><span class="STRN">'class'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>387</span> </span><span class="WHIT">				</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>388</span> </span><span class="WHIT">					</span><span class="NAME">elem.className</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">persistentClasses.join</span><span class="PUNC">(</span><span class="STRN">' '</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>389</span> </span><span class="WHIT">				</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>390</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>391</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>392</span> 
+<span class='line'>393</span> </span><span class="WHIT">		</span><span class="COMM">// Ephemera.attributes() and Ephemera.ephemera({ attrMap: {}, attrRxs: {} })</span><span class="WHIT">
+<span class='line'>394</span> </span><span class="WHIT">		</span><span class="NAME">pruneEmapAttrs</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">emap</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>395</span> 
+<span class='line'>396</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>397</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>398</span> 
+<span class='line'>399</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>400</span> 	 * Called for each node during the pruning of a DOM tree.
+<span class='line'>401</span> <span class='line'>402</span> 	 */</span><span class="WHIT">
+<span class='line'>403</span> </span><span class="WHIT">	</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">pruneStep</span><span class="PUNC">(</span><span class="NAME">emap</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">step</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">node</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>404</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NUMB">1</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NAME">node.nodeType</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>405</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">pruneElem</span><span class="PUNC">(</span><span class="NAME">node</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">emap</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>406</span> </span><span class="WHIT">				</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>407</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>408</span> </span><span class="WHIT">			</span><span class="NAME">node</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">Trees.walkDomInplace</span><span class="PUNC">(</span><span class="NAME">node</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">step</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>409</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>410</span> 
+<span class='line'>411</span> </span><span class="WHIT">		</span><span class="COMM">// Ephemera.ephemera({ pruneFns: [] })</span><span class="WHIT">
+<span class='line'>412</span> </span><span class="WHIT">		</span><span class="NAME">node</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">Arrays.reduce</span><span class="PUNC">(</span><span class="NAME">emap.pruneFns</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">node</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">Arrays.applyNotNull</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>413</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">node</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>414</span> </span><span class="WHIT">			</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>415</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>416</span> 
+<span class='line'>417</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="NAME">node</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>418</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>419</span> 
+<span class='line'>420</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>421</span> 	 * Prunes the given element of all ephemeral data.
+<span class='line'>422</span> 	 *
+<span class='line'>423</span> 	 * Elements marked with Ephemera.markElement() will be removed.
+<span class='line'>424</span> 	 * Attributes marked with Ephemera.markAttribute() will be removed.
+<span class='line'>425</span> 	 * Elements marked with Ephemera.markWrapper() or
+<span class='line'>426</span> 	 * Ephemera.markFiller() will be replaced with their children.
+<span class='line'>427</span> 	 *
+<span class='line'>428</span> 	 * See ephemera() for an explanation of the emap argument.
+<span class='line'>429</span> 	 *
+<span class='line'>430</span> 	 * All properties of emap, if specified, are required, but may be
+<span class='line'>431</span> 	 * empty.
+<span class='line'>432</span> 	 *
+<span class='line'>433</span> 	 * The element is modified in-place and returned.
+<span class='line'>434</span> 	 */</span><span class="WHIT">
+<span class='line'>435</span> </span><span class="WHIT">	</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">prune</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">emap</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>436</span> </span><span class="WHIT">		</span><span class="NAME">emap</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">emap</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">ephemeraMap</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>437</span> 
+<span class='line'>438</span> </span><span class="WHIT">		</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">pruneStepClosure</span><span class="PUNC">(</span><span class="NAME">node</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>439</span> </span><span class="WHIT">			</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">pruneStep</span><span class="PUNC">(</span><span class="NAME">emap</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">pruneStepClosure</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">node</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>440</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>441</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">pruneStepClosure</span><span class="PUNC">(</span><span class="NAME">elem</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>442</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>443</span> 
+<span class='line'>444</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">Aloha.settings.ephemera</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>445</span> </span><span class="WHIT">		</span><span class="NAME">ephemera</span><span class="PUNC">(</span><span class="NAME">Aloha.settings.ephemera</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>446</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>447</span> 
+<span class='line'>448</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>449</span> </span><span class="WHIT">		</span><span class="NAME">ephemera</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">ephemera</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>450</span> </span><span class="WHIT">		</span><span class="NAME">classes</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">classes</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>451</span> </span><span class="WHIT">		</span><span class="NAME">attributes</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">attributes</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>452</span> </span><span class="WHIT">		</span><span class="NAME">markElement</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">markElement</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>453</span> </span><span class="WHIT">		</span><span class="NAME">markAttribute</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">markAttribute</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>454</span> </span><span class="WHIT">		</span><span class="NAME">markWrapper</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">markWrapper</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>455</span> </span><span class="WHIT">		</span><span class="NAME">markFiller</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">markFiller</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>456</span> </span><span class="WHIT">		</span><span class="NAME">prune</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">prune</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>457</span> </span><span class="WHIT">		</span><span class="NAME">isAttrEphemeral</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">isAttrEphemeral</span><span class="WHIT">
+<span class='line'>458</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>459</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>460</span> </span></pre></body></html>

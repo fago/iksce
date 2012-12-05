@@ -1,0 +1,13 @@
+name = Backbone RestWS
+description = Provides default Backbone models, collections and settings for working with RestWS-based APIs.
+dependencies[] = backbone
+dependencies[] = restws
+package = Backbone
+core = 7.x
+
+; Information added by drupal.org packaging script on 2012-10-24
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "backbone"
+datestamp = "1351038955"
+

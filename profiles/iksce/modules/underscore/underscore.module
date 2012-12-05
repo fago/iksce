@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * @file
+ * Integrates the Underscore JS Library.
+ */
+
+/**
+ * Implements hook_init().
+ */
+function underscore_init() {
+  // We use hook init rather than defining it in the .info file so
+  // it can be added as a library.
+  drupal_add_library('underscore', 'underscore');
+}
+
+/**
+ * Implements hook_library().
+ */
+function underscore_library() {
+  $libraries['underscore'] = array(
+    'title' => 'Underscore', 
+    'website' => 'http://documentcloud.github.com/underscore', 
+    'version' => '1.1.6', 
+    'js' => array(
+      drupal_get_path('module', 'underscore') . '/lib/underscore-min.js' => array('group' => JS_LIBRARY, 'every_page' => TRUE, 'weight' => -19),
+    ),
+  );
+  return $libraries;
+}

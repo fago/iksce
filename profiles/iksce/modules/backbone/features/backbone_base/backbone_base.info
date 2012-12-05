@@ -1,0 +1,23 @@
+name = "Backbone Base"
+description = "Feature with base setup for Backbone module, with REST endpoint."
+core = "7.x"
+package = "Backbone"
+php = "5.2.4"
+version = "7.x-1.0-alpha2"
+project = "backbone_base"
+dependencies[] = "ctools"
+dependencies[] = "rest_server"
+dependencies[] = "services"
+dependencies[] = "services_views"
+dependencies[] = "views"
+features[ctools][] = "services:services:3"
+features[ctools][] = "views:views_default:3.0"
+features[services_endpoint][] = "backbone_rest"
+features[views_view][] = "backbone_test"
+
+; Information added by drupal.org packaging script on 2012-10-24
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "backbone"
+datestamp = "1351038955"
+

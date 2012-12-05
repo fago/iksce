@@ -1,0 +1,55 @@
+(function ($){
+  Drupal.behaviors.backbone_munich = {
+    attach: function() {
+
+      // Create Node View
+      var NodeView = Drupal.Backbone.Views.Base.extend({
+      	templateSelector: '#backbone_munich_node_event_bind_template',
+	renderer: 'twig',
+	events: {
+	  "click button.promote-toggle": "togglePromote"
+	},
+	initialize: function(opts) {
+	  this.constructor.__super__.initialize.call(this, opts);
+	  this.model.bind('change', this.render);
+	  _(this).bindAll("togglePromote");
+	},
+	togglePromote: function() {
+	  this.model.togglePromote();
+	}
+      });
+
+      // Create a new model class
+      var TogglePromoteNode = Drupal.Backbone.Models.Node.extend({
+	initialize: function(opts) {
+	  this.constructor.__super__.initialize.call(this, opts);
+	  _(this).bindAll('togglePromote');
+	},
+	togglePromote: function() {
+	  var promoteVal = this.get('promote')===1 ? 0 : 1;
+	  this.set('promote', promoteVal);
+	  this.save();
+	}
+      });
+      
+      // Load a node
+      var myNode = new TogglePromoteNode({
+	nid: 1
+      });
+
+      myNode.bind('change', function(){
+	console.log('HALO');
+      });
+
+      // create our view instance
+      var myNodeView = new NodeView({
+      	model: myNode,
+      	renderer: "twig",
+	el: '#backbone-munich-node-event-bind-app'
+      });
+
+      myNode.fetch();
+      
+    }
+  }
+})(jQuery);
