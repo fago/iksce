@@ -1,0 +1,44 @@
+<?php
+
+/**
+ * @file
+ * IKS content enhancment javascript module file.
+ */
+
+function iksce_js_init() {
+
+  debug('test-add');
+  drupal_add_library('iksce_js', 'annotate');
+}
+
+/**
+ * Implements hook_library().
+ */
+function iksce_js_library() {
+
+  $libraries['vie'] = array(
+    'title' => 'VIE.js',
+    'website' => 'http://viejs.org/',
+    'version' => '2.0.0',
+    'js' => array(
+      libraries_get_path('vie') . '/vie-2.0.0.debug.js' => array(),
+    ),
+    'dependencies' => array(
+      array('backbone_library' , 'backbone'),
+    ),
+  );
+  $libraries['annotate'] = array(
+    'title' => 'annotate.js',
+    'website' => 'http://http://viejs.org/',
+    'version' => '2.0.0',
+    'js' => array(
+      libraries_get_path('annotate') . '/annotate.js' => array(),
+    ),
+    'dependencies' => array(
+      array('iksce_js' , 'vie'),
+      array('system', 'ui.widget'),
+    ),
+  );
+
+  return $libraries;
+}

@@ -1,0 +1,6 @@
+name = IKSce Javascript
+description = Adds javascript libraries required by the IKS Content Enhancement demo.
+package = IKSce Demo
+core = 7.x
+php = 5.3
+dependencies[] = backbone_library
