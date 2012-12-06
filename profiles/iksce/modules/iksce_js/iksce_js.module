@@ -7,9 +7,12 @@
 
 function iksce_js_init() {
 
-  debug('test-add');
   drupal_add_library('iksce_js', 'annotate');
   drupal_add_js(drupal_get_path('module', 'iksce_js') . '/iksce.js');
+
+  // Does not work because of missing jquery ui tooltip - included with 1.9
+  //drupal_add_library('iksce_js', 'entitypreview');
+  //drupal_add_js(drupal_get_path('module', 'iksce_js') . '/entitypreview.js');
 }
 
 /**
@@ -53,6 +56,19 @@ function iksce_js_library() {
       array('iksce_js' , 'vie'),
       array('system', 'ui.dialog'),
       array('system', 'ui.autocomplete'),
+    ),
+  );
+
+  $libraries['entitypreview'] = array(
+    'title' => 'vie.entitypreview.js',
+    'website' => 'https://github.com/szabyg/vie.entitypreview',
+    'version' => 'dev',
+    'js' => array(
+      libraries_get_path('entitypreview') . '/vie.entitypreview.js' => array(),
+    ),
+    'dependencies' => array(
+      array('iksce_js' , 'vie'),
+      array('jquery_plugin', 'tooltip'),
     ),
   );
 

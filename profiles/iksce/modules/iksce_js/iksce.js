@@ -5,7 +5,7 @@
   _ = root._;
   VIE = root.VIE;
 
-  selector = '.field-name-body';
+  var selector = '.field-name-body';
   logger = true ? console : {
     info: function() {},
     warn: function() {},
@@ -16,7 +16,7 @@
   Drupal.behaviors.iksce_annotate = {
     attach: function (context, settings) {
 
-      vie = new VIE();
+      var vie = new VIE();
       vie.use(new vie.StanbolService({
         url : "http://dev.iks-project.eu/stanbolfull",
         proxyDisabled: true
