@@ -24,22 +24,19 @@
 
       $('.vie-autocomplete', context)
         .once('vie-autocomplete', function() {
+          var textfield = this;
 
           $(this).vieAutocomplete({
             vie: vie,
             select: function (e, ui) {
 
-              console.log('You have selected ' + ui.item.value + "key" + ui.item.key);
-              console.log(ui.item);
-              var uri = ui.item.getUri();
-
-
-
+              // Read the name "field_tags[und][0][value]" and replace value.
+              name = $(textfield).attr('name').replace('value', 'uri');
+              $("input[name='" + name + "']").val(ui.item.getUri());
             },
             showTooltip : false
           });
         })
-
     }
   };
 

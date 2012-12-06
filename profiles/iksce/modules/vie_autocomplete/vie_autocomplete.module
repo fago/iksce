@@ -38,7 +38,7 @@ function vie_autocomplete_field_widget_form(&$form, &$form_state, $field, $insta
 
   $element['value'] = array(
     '#type' => 'textfield',
-    '#default_value' => isset($tags[$delta]) ? $tags[$delta]->name : NULL,
+    '#default_value' => !empty($tags[$delta]) ? $tags[$delta]->name : NULL,
     '#attributes' => array('class' => array('vie-autocomplete')),
     '#size' => $instance['widget']['settings']['size'],
     '#maxlength' => 1024,
@@ -63,8 +63,10 @@ function vie_autocomplete_widget_validate($element, &$form_state) {
   $parents = $element['#array_parents'];
   array_pop($parents);
   $parent_element = drupal_array_get_nested_value($form_state['complete form'], $parents);
+  $parent_value = drupal_array_get_nested_value($form_state['values'], $parent_element['#parents']);
 
   $value = array();
+
   if ($tag = $element['#value']) {
     // Collect candidate vocabularies.
     $field = field_widget_field($parent_element, $form_state);
@@ -89,11 +91,13 @@ function vie_autocomplete_widget_validate($element, &$form_state) {
         'name' => $tag,
         'vocabulary_machine_name' => $vocabulary->machine_name,
       );
+      if (!empty($parent_value['uri'])) {
+        $term['field_uri'][LANGUAGE_NONE][0]['value'] = $parent_value['uri'];
+      }
     }
-    $value[] = (array)$term;
+    $value = (array)$term;
   }
-
-  form_set_value($element, $value, $form_state);
+  form_set_value($parent_element, $value, $form_state);
 }
 
 /**
