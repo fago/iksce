@@ -80,7 +80,8 @@ function iksce_js_library() {
     ),
     'dependencies' => array(
       array('iksce_js' , 'vie'),
-      array('system', 'ui.widget'),
+      array('system', 'ui.autocomplete'),
+      array('iksce_js', 'vie.entitypreview'),
     ),
   );
 

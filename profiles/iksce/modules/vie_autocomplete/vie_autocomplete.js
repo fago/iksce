@@ -27,7 +27,7 @@
           $(this).vieAutocomplete({
             vie: vie,
             select: function (e, ui) {
-              console.log('You have selected ' + ui.item.value + "key". ui.item.key);
+              console.log('You have selected ' + ui.item.value + "key" + ui.item.key);
               console.log(ui.item);
             }
           });
@@ -38,3 +38,4 @@
 
 })(jQuery);
 
+$=jQuery;
