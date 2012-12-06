@@ -1,0 +1,91 @@
+<?php
+/**
+ * @file
+ * Provides a Stanbol-based service class for the Search API.
+ */
+
+/**
+ * Implements hook_search_api_service_info().
+ */
+function search_api_stanbol_search_api_service_info() {
+  $services['search_api_stanbol_service'] = array(
+    'name' => t('Stanbol service'),
+    'description' => t('<p>Index items using an Apache Stanbol search server.</p>'),
+    'class' => 'SearchApiStanbolService',
+  );
+  return $services;
+}
+
+/**
+ * Implements hook_help().
+ */
+function __search_api_stanbol_help($path, array $arg = array()) {
+  if ($path == 'admin/config/search/search_api') {
+    // Included because we need the REQUIREMENT_* constants.
+    include_once(DRUPAL_ROOT . '/includes/install.inc');
+    module_load_include('install', 'search_api_stanbol');
+    $reqs = search_api_stanbol_requirements('runtime');
+    foreach ($reqs as $req) {
+      if (isset($req['description'])) {
+        $type = $req['severity'] == REQUIREMENT_ERROR ? 'error' : ($req['severity'] == REQUIREMENT_WARNING ? 'warning' : 'status');
+        drupal_set_message($req['description'], $type);
+      }
+    }
+  }
+  elseif ($path == 'admin/config/search/search_api/server/%' && !empty($arg[5])) {
+    $server = search_api_server_load($arg[5]);
+    if ($server && $server->enabled && $server->class == 'search_api_stanbol_service') {
+      $ping = $server->ping();
+      $type = $ping ? 'status' : 'error';
+      if ($ping) {
+        $msg = t('The Solr server could be reached (latency: @millisecs ms).', array('@millisecs' => $ping * 1000));
+      }
+      else {
+        $msg = t('The Solr server could not be reached.');
+      }
+      drupal_set_message($msg, $type);
+    }
+  }
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function __search_api_stanbol_requirements($phase) {
+  if ($phase == 'runtime') {
+    $servers = search_api_server_load_multiple(FALSE, array('class' => 'search_api_stanbol_service', 'enabled' => TRUE));
+    $count = 0;
+    $unavailable = 0;
+    $last = NULL;
+    foreach ($servers as $server) {
+      if (!$server->ping()) {
+        ++$unavailable;
+        $last = $server;
+      }
+      ++$count;
+    }
+    if (!$count) {
+      return array();
+    }
+    $ret['search_api_stanbol'] = array(
+      'title' => t('Stanbol servers'),
+      'value' => format_plural($count, '1 server', '@count servers'),
+    );
+    if ($unavailable) {
+      if ($unavailable == 1) {
+        $ret['search_api_stanbol']['description'] = t('The stanbol server of <a href="!url">%name</a> could not be reached.',
+            array('!url' => url('admin/config/search/search_api/server/' . $last->machine_name), '%name' => $last->name));
+      }
+      else {
+        $ret['search_api_stanbol']['description'] = t('@count stanbol servers could not be reached.', array('@count' => $unavailable));
+      }
+      $ret['search_api_stanbol']['severity'] = REQUIREMENT_ERROR;
+    }
+    else {
+      $ret['search_api_stanbol']['description'] = format_plural($count, 'The stanbol server could be reached.', 'All @count stanbol servers could be reached.');
+      $ret['search_api_stanbol']['severity'] = REQUIREMENT_OK;
+    }
+
+    return $ret;
+  }
+}
