@@ -9,12 +9,22 @@ function iksce_js_init() {
 
   debug('test-add');
   drupal_add_library('iksce_js', 'annotate');
+  drupal_add_js(drupal_get_path('module', 'iksce_js') . '/iksce.js');
 }
 
 /**
  * Implements hook_library().
  */
 function iksce_js_library() {
+
+  $libraries['rdfquery'] = array(
+    'title' => 'rdfquery',
+    'website' => 'http://code.google.com/p/rdfquery/',
+    'version' => '1.0',
+    'js' => array(
+      libraries_get_path('rdfquery') . '/jquery.rdfquery.rules-1.0.js' => array(),
+    ),
+  );
 
   $libraries['vie'] = array(
     'title' => 'VIE.js',
@@ -25,18 +35,24 @@ function iksce_js_library() {
     ),
     'dependencies' => array(
       array('backbone_library' , 'backbone'),
+      array('iksce_js' , 'rdfquery'),
     ),
   );
+
   $libraries['annotate'] = array(
     'title' => 'annotate.js',
-    'website' => 'http://http://viejs.org/',
-    'version' => '2.0.0',
+    'website' => 'https://github.com/szabyg/annotate.js',
+    'version' => '0.3-dev',
     'js' => array(
       libraries_get_path('annotate') . '/annotate.js' => array(),
     ),
+    'css' => array(
+      drupal_get_path('module', 'iksce_js') . '/annotate.css' => array(),
+    ),
     'dependencies' => array(
       array('iksce_js' , 'vie'),
-      array('system', 'ui.widget'),
+      array('system', 'ui.dialog'),
+      array('system', 'ui.autocomplete'),
     ),
   );
 
