@@ -16,23 +16,27 @@
     attach: function (context, settings) {
 
       var vie = new VIE();
-      vie.use(new vie.StanbolService({
+      var service = new vie.StanbolService({
         url : "http://dev.iks-project.eu/stanbolfull",
         proxyDisabled: true
-      }));
+      });
+      vie.use(service);
 
       $('.vie-autocomplete', context)
         .once('vie-autocomplete', function() {
+          var textfield = this;
 
           $(this).vieAutocomplete({
             vie: vie,
             select: function (e, ui) {
-              console.log('You have selected ' + ui.item.value + "key" + ui.item.key);
-              console.log(ui.item);
-            }
+
+              // Read the name "field_tags[und][0][value]" and replace value.
+              name = $(textfield).attr('name').replace('value', 'uri');
+              $("input[name='" + name + "']").val(ui.item.getUri());
+            },
+            showTooltip : false
           });
         })
-
     }
   };
 

@@ -16,9 +16,6 @@ function vie_autocomplete_field_widget_info() {
       'settings' => array(
         'size' => 60,
       ),
-      'behaviors' => array(
-       // 'multiple values' => FIELD_BEHAVIOR_CUSTOM,
-      ),
     ),
   );
 }
@@ -28,8 +25,8 @@ function vie_autocomplete_field_widget_info() {
  */
 function vie_autocomplete_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   $tags = array();
-  foreach ($items as $item) {
-    $tags[$item['tid']] = isset($item['taxonomy_term']) ? $item['taxonomy_term'] : taxonomy_term_load($item['tid']);
+  foreach ($items as $i => $item) {
+    $tags[$i] = isset($item['taxonomy_term']) ? $item['taxonomy_term'] : taxonomy_term_load($item['tid']);
   }
 
   $element['#attached'] = array(
@@ -39,14 +36,19 @@ function vie_autocomplete_field_widget_form(&$form, &$form_state, $field, $insta
     'js' => array(drupal_get_path('module', 'vie_autocomplete') . '/vie_autocomplete.js'),
   );
 
-  $element += array(
+  $element['value'] = array(
     '#type' => 'textfield',
-    '#default_value' => taxonomy_implode_tags($tags),
+    '#default_value' => !empty($tags[$delta]) ? $tags[$delta]->name : NULL,
     '#attributes' => array('class' => array('vie-autocomplete')),
     '#size' => $instance['widget']['settings']['size'],
     '#maxlength' => 1024,
-    '#element_validate' => array('vie_autocomplete_validate'),
+    '#element_validate' => array('vie_autocomplete_widget_validate'),
   );
+  // A hidden element holding the URI of newly created terms.
+  $element['uri'] = array(
+    '#type' => 'hidden',
+  );
+
 
   return $element;
 }
@@ -54,42 +56,48 @@ function vie_autocomplete_field_widget_form(&$form, &$form_state, $field, $insta
 /**
  * Form element validate handler for taxonomy term autocomplete element.
  */
-function vie_autocomplete_validate($element, &$form_state) {
+function vie_autocomplete_widget_validate($element, &$form_state) {
   // Autocomplete widgets do not send their tids in the form, so we must detect
   // them here and process them independently.
+
+  $parents = $element['#array_parents'];
+  array_pop($parents);
+  $parent_element = drupal_array_get_nested_value($form_state['complete form'], $parents);
+  $parent_value = drupal_array_get_nested_value($form_state['values'], $parent_element['#parents']);
+
   $value = array();
-  if ($tags = $element['#value']) {
+
+  if ($tag = $element['#value']) {
     // Collect candidate vocabularies.
-    $field = field_widget_field($element, $form_state);
+    $field = field_widget_field($parent_element, $form_state);
     $vocabularies = array();
     foreach ($field['settings']['allowed_values'] as $tree) {
       if ($vocabulary = taxonomy_vocabulary_machine_name_load($tree['vocabulary'])) {
         $vocabularies[$vocabulary->vid] = $vocabulary;
       }
     }
-
     // Translate term names into actual terms.
-    $typed_terms = drupal_explode_tags($tags);
-    foreach ($typed_terms as $typed_term) {
-      // See if the term exists in the chosen vocabulary and return the tid;
-      // otherwise, create a new 'autocreate' term for insert/update.
-      if ($possibilities = taxonomy_term_load_multiple(array(), array('name' => trim($typed_term), 'vid' => array_keys($vocabularies)))) {
-        $term = array_pop($possibilities);
-      }
-      else {
-        $vocabulary = reset($vocabularies);
-        $term = array(
-          'tid' => 'autocreate',
-          'vid' => $vocabulary->vid,
-          'name' => $typed_term,
-          'vocabulary_machine_name' => $vocabulary->machine_name,
-        );
-      }
-      $value[] = (array)$term;
-    }
-  }
 
-  form_set_value($element, $value, $form_state);
+    // See if the term exists in the chosen vocabulary and return the tid;
+    // otherwise, create a new 'autocreate' term for insert/update.
+    if ($possibilities = taxonomy_term_load_multiple(array(), array('name' => trim($tag), 'vid' => array_keys($vocabularies)))) {
+      $term = array_pop($possibilities);
+    }
+    else {
+      $vocabulary = reset($vocabularies);
+      $term = array(
+        'tid' => 'autocreate',
+        'vid' => $vocabulary->vid,
+        'name' => $tag,
+        'vocabulary_machine_name' => $vocabulary->machine_name,
+      );
+      if (!empty($parent_value['uri'])) {
+        $term['field_uri'][LANGUAGE_NONE][0]['value'] = $parent_value['uri'];
+      }
+    }
+    $value = (array)$term;
+  }
+  form_set_value($parent_element, $value, $form_state);
 }
 
 /**
