@@ -17,6 +17,17 @@ function iksce_js_init() {
 }
 
 /**
+ * Returns the configuration for VIE.js
+ */
+function iksce_vie_stanbol_config() {
+  // This are the settings as passed to "new vie.StanbolService" in js.
+  return array(
+    'url' => 'http://dev.iks-project.eu/stanbolfull',
+    'proxyDisabled' => TRUE,
+  );
+}
+
+/**
  * Implements hook_library().
  */
 function iksce_js_library() {
@@ -36,6 +47,7 @@ function iksce_js_library() {
     'version' => '2.0.0',
     'js' => array(
       libraries_get_path('vie') . '/vie-2.0.0.debug.js' => array(),
+      array('type' => 'setting', 'data' => array('iksce' => array('stanbol' => iksce_vie_stanbol_config()))),
     ),
     'dependencies' => array(
       array('backbone_library' , 'backbone'),

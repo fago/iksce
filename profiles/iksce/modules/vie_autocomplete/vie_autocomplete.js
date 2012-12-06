@@ -16,10 +16,8 @@
     attach: function (context, settings) {
 
       var vie = new VIE();
-      var service = new vie.StanbolService({
-        url : "http://dev.iks-project.eu/stanbolfull",
-        proxyDisabled: true
-      });
+      console.log(settings.iksce.stanbol);
+      var service = new vie.StanbolService(settings.iksce.stanbol);
       vie.use(service);
 
       $('.vie-autocomplete', context)
