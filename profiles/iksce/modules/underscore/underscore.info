@@ -1,9 +1,0 @@
-name = Underscore
-description = "A developer module that provides the underscore JavaScript library (http://documentcloud.github.com/underscore)."
-core = 7.x
-; Information added by drupal.org packaging script on 2011-04-25
-version = "7.x-1.2"
-core = "7.x"
-project = "underscore"
-datestamp = "1303736216"
-
