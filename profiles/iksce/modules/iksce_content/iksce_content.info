@@ -1,7 +1,11 @@
 name = iksce_content
 core = 7.x
 package = Features
+php = 5.2.4
 dependencies[] = defaultcontent
+dependencies[] = strongarm
 features[content][] = person-john
 features[content][] = person-sergio
+features[ctools][] = strongarm:strongarm:1
 features[features_api][] = api:1
+features[variable][] = node_content_enabled
