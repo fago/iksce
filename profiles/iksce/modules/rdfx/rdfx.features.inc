@@ -10,13 +10,18 @@ function rdf_mappings_features_export($data, &$export, $module_name = '') {
   $export['dependencies']['rdf'] = 'rdf';
   $export['dependencies']['rdfx'] = 'rdfx';
 
-  foreach ($data as $key => $value) {
-    $parts = explode('-', $key);
+  foreach ($data as $name) {
+    $parts = explode(':', $name);
     $entity_type = $parts[0];
     $bundle_name = $parts[1];
+    $property = !empty($parts[2]) ? $parts[2] : NULL;
 
-    if ($rdf_mapping = rdf_mapping_load($entity_type, $bundle_name)) {
-      $export['features']['rdf_mappings'][$entity_type . '-' . $bundle_name] = $rdf_mapping;
+    $rdf_mapping = rdf_mapping_load($entity_type, $bundle_name);
+    if (!empty($rdf_mapping['rdftype']) && empty($property)) {
+      $export['features']['rdf_mappings'][$entity_type . ':' . $bundle_name] = $rdf_mapping['rdftype'];
+    }
+    elseif (!empty($rdf_mapping[$property])) {
+      $export['features']['rdf_mappings'][$entity_type . ':' . $bundle_name . ':' . $property] = $rdf_mapping[$property];
     }
   }
 
@@ -29,15 +34,21 @@ function rdf_mappings_features_export($data, &$export, $module_name = '') {
  * Provides an array of components that can be exported for a given type.
  */
 function rdf_mappings_features_export_options() {
-  $bundles = array();
-
+  $options = array();
   foreach (entity_get_info() as $entity_type => $entity) {
     foreach ($entity['bundles'] as $bundle_name => $bundle) {
-      $bundles[$entity_type . '-' . $bundle_name] = $entity['label'] . ': ' . $bundle['label'];
+      foreach (rdf_mapping_load($entity_type, $bundle_name) as $name => $mapping) {
+        if ($name == 'rdftype') {
+          $options[$entity_type . ':' . $bundle_name] = $entity_type . ':' . $bundle_name;
+        }
+        else {
+          $options[$entity_type . ':' . $bundle_name . ':' . $name] = $entity_type . ':' . $bundle_name . ':' . $name;
+        }
+      }
     }
   }
 
-  return $bundles;
+  return $options;
 }
 
 /**
@@ -54,15 +65,32 @@ function rdf_mappings_features_export_render($module, $data, $export = NULL) {
     if (is_array($entity_type_bundle)) {
       $entity_type_bundle = $key;
     }
-    $parts = explode('-', $entity_type_bundle);
+
+    $var = array();
+    $parts = explode(':', $entity_type_bundle);
     $entity_type = $parts[0];
     $bundle_name = $parts[1];
-    if ($rdf_mapping = rdf_mapping_load($entity_type, $bundle_name)) {
-      $rdf_mapping_export = features_var_export($rdf_mapping, '  ');
-      $rdf_bundle = features_var_export($bundle_name);
-      $rdf_entity_type = features_var_export($entity_type);
-      $code[] = "  // Exported RDF mapping: {$bundle_name}";
-      $code[] = "  \$rdf_mappings[$rdf_entity_type][$rdf_bundle] = $rdf_mapping_export;";
+    $property = !empty($parts[2]) ? $parts[2] : NULL;
+    $rdf_mapping = rdf_mapping_load($entity_type, $bundle_name);
+
+    if (!empty($rdf_mapping['rdftype']) && empty($property)) {
+      $component = $entity_type . ':' . $bundle_name;
+      $var['rdf types'] = $rdf_mapping['rdftype'];
+    }
+    elseif (!empty($rdf_mapping[$property])) {
+      $component = $entity_type . ':' . $bundle_name . ':' . $property;
+      $var['rdf properties'] = $rdf_mapping[$property]['predicates'];
+      if (!empty($rdf_mapping[$property]['datatype'])) {
+        $var['rdf value datatype'] = $rdf_mapping[$property]['datatype'];
+      }
+      if (!empty($rdf_mapping[$property]['callback'])) {
+        $var['rdf value callback'] = $rdf_mapping[$property]['callback'];
+      }
+    }
+    if ($var) {
+      $var_export = features_var_export($var, '  ');
+      $code[] = "  // Exported Entity RDF mapping: {$component}";
+      $code[] = "  \$rdf_mappings['$component'] = $var_export;";
       $code[] = "";
     }
   }
@@ -87,15 +115,5 @@ function rdf_mappings_features_revert($module) {
  * Updates faux-exportable components back to their default state.
  */
 function rdf_mappings_features_rebuild($module) {
-  if ($defaults = features_get_default('rdf_mappings', $module)) {
-    foreach ($defaults as $entity_type => $bundles) {
-      foreach ($bundles as $bundle => $mapping) {
-        rdf_mapping_save(array(
-          'type' => $entity_type,
-          'bundle' => $bundle,
-          'mapping' => $mapping,
-        ));
-      }
-    }
-  }
+  // not supported.
 }
