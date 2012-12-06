@@ -1,0 +1,5 @@
+name = VIE.js autocomplete
+description = An autocomplete widget based on the VIE.js widget.
+core = 7.x
+dependencies[] = iksce_js
+
