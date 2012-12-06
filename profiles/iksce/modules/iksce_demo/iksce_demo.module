@@ -5,3 +5,38 @@
  */
 
 include_once 'iksce_demo.features.inc';
+
+/**
+ * Implements hook_rdf_namespaces().
+ */
+function iksce_demo_rdf_namespaces() {
+  return array(
+    'schema'   => 'http://schema.org/',
+  );
+}
+
+/**
+ * Implements hook_entity_rdf_mappings().
+ */
+function iksce_demo_entity_rdf_mappings() {
+  return array(
+    // node person mappings (bundle, property and field property mappings).
+    'node:person' => array(
+      'rdf types' => array('http://schema.org/Person'),
+    ),
+    'node:person:title' => array(
+      'rdf properties' => array('http://schema.org/name'),
+    ),
+    'node:person:body' => array(
+      'field properties' => array(
+        'value' => array(
+          'rdf properties' => array('http://schema.org/description'),
+        ),
+      ),
+    ),
+    'node:person:field_picture' => array(
+      'rdf properties' => array('http://xmlns.com/foaf/0.1/depiction'),
+      'rdf resource' => '[node:field-picture:file:url]',
+    ),
+  );
+}
