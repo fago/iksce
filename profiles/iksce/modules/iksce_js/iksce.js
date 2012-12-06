@@ -17,10 +17,7 @@
     attach: function (context, settings) {
 
       var vie = new VIE();
-      vie.use(new vie.StanbolService({
-        url : "http://dev.iks-project.eu/stanbolfull",
-        proxyDisabled: true
-      }));
+      vie.use(new vie.StanbolService(settings.iksce.stanbol));
 
       // Instantiate annotate.js.
       function instantiate() {
@@ -29,7 +26,7 @@
           // typeFilter: ["http://dbpedia.org/ontology/Place", "http://dbpedia.org/ontology/Organisation", "http://dbpedia.org/ontology/Person"],
           debug: true,
           autoAnalyze: false,
-          showTooltip: true,
+          showTooltip: false,
           decline: function(event, ui){
             console.info('decline event', event, ui);
           },

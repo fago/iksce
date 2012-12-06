@@ -16,7 +16,6 @@
     attach: function (context, settings) {
 
       var vie = new VIE();
-      console.log(settings.iksce.stanbol);
       var service = new vie.StanbolService(settings.iksce.stanbol);
       vie.use(service);
 
