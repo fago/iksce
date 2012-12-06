@@ -7,8 +7,9 @@
 
 function iksce_js_init() {
 
-  drupal_add_library('iksce_js', 'vie.annotate');
-  drupal_add_js(drupal_get_path('module', 'iksce_js') . '/iksce.js');
+  // Enable to test annotate.js
+  //drupal_add_library('iksce_js', 'vie.annotate');
+  //drupal_add_js(drupal_get_path('module', 'iksce_js') . '/iksce.js');
 
   // Does not work because of missing jquery ui tooltip - included with 1.9
   //drupal_add_library('iksce_js', 'vie.entitypreview');
@@ -79,6 +80,7 @@ function iksce_js_library() {
     ),
     'dependencies' => array(
       array('iksce_js' , 'vie'),
+      array('system', 'ui.widget'),
     ),
   );
 
