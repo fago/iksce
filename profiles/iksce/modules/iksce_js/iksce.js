@@ -57,6 +57,7 @@
               .annotate('enable', function(success){
                 if(success){
                   logger.log('success');
+                  acceptAll();
                 }
                 else {
                   logger.log('no success');
@@ -68,7 +69,8 @@
       function acceptAll() {
         $(selector)
           .each(function() {
-            $(this).annotate('acceptAll', function(report) {
+            $(this)
+              .annotate('acceptAll', function(report) {
               logger.log('AcceptAll finished with the report:', report);
           });
         })
@@ -76,7 +78,6 @@
 
       instantiate();
       enable();
-      acceptAll();
     }
   };
 
