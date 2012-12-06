@@ -16,10 +16,11 @@
     attach: function (context, settings) {
 
       var vie = new VIE();
-      vie.use(new vie.StanbolService({
+      var service = new vie.StanbolService({
         url : "http://dev.iks-project.eu/stanbolfull",
         proxyDisabled: true
-      }));
+      });
+      vie.use(service);
 
       $('.vie-autocomplete', context)
         .once('vie-autocomplete', function() {
@@ -27,9 +28,15 @@
           $(this).vieAutocomplete({
             vie: vie,
             select: function (e, ui) {
+
               console.log('You have selected ' + ui.item.value + "key" + ui.item.key);
               console.log(ui.item);
-            }
+              var uri = ui.item.getUri();
+
+
+
+            },
+            showTooltip : false
           });
         })
 
