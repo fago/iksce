@@ -75,7 +75,7 @@
           return _.defer(function() {
             var cacheEntry, entity;
             cacheEntry = _this._entities()[uri];
-            entity = _.detect(entityArr, function(e) {
+            entity = _.find(entityArr, function(e) {
               if (e.getSubject() === ("<" + uri + ">")) return true;
             });
             if (entity) {
@@ -401,7 +401,7 @@
       start = nearestPosition(textContentOf(element), text, start);
       pos = 0;
       while (textContentOf(domEl).indexOf(text) !== -1 && domEl.nodeName !== '#text') {
-        domEl = _(domEl.childNodes).detect(function(el) {
+        domEl = _(domEl.childNodes).find(function(el) {
           var p;
           p = textContentOf(el).lastIndexOf(text);
           if (p >= start - pos) {
@@ -538,7 +538,7 @@
             entity: entity.getSubject()
           }).using("stanbol").execute().success(function(res) {
             var loadedEntity;
-            loadedEntity = _(res).detect(function(e) {
+            loadedEntity = _(res).find(function(e) {
               return entity.getSubject() === e.getSubject();
             });
             return callback(loadedEntity);
@@ -558,11 +558,11 @@
     _getDepiction: function(entity, picSize) {
       var depictionUrl, field, fieldValue, preferredFields;
       preferredFields = this.options.depictionProperties;
-      field = _(preferredFields).detect(function(field) {
+      field = _(preferredFields).find(function(field) {
         if (entity.get(field)) return true;
       });
       if (field && (fieldValue = _([entity.get(field)]).flatten())) {
-        depictionUrl = _(fieldValue).detect(function(uri) {
+        depictionUrl = _(fieldValue).find(function(uri) {
           uri = (typeof uri.getSubject === "function" ? uri.getSubject() : void 0) || uri;
           if (uri.indexOf("thumb") !== -1) return true;
         }).replace(/[0-9]{2..3}px/, "" + picSize + "px");
@@ -590,7 +590,7 @@
           property = preferredFields[_j];
           if (typeof property === "string" && entity.get(property)) {
             labelArr = _.flatten([entity.get(property)]);
-            label = _(labelArr).detect(function(label) {
+            label = _(labelArr).find(function(label) {
               if (typeof label === "string" && label.toString().indexOf("@" + lang) > -1) {
                 true;
               }
@@ -671,7 +671,7 @@
           var navigatorLanguage, userLang;
           navigatorLanguage = window.navigator.language || window.navigator.userLanguage;
           userLang = navigatorLanguage.split("-")[0];
-          _this.linkedEntity.label = _(cachedEntity.get("rdfs:label")).detect(function(label) {
+          _this.linkedEntity.label = _(cachedEntity.get("rdfs:label")).find(function(label) {
             if (label.toString().indexOf("@" + userLang) > -1) return true;
           }).toString().replace(/(^\"*|\"*@..$)/g, "");
           return _this._logger.info("did I figure out?", _this.linkedEntity.label);
@@ -871,10 +871,10 @@
       allKnownPrefixes = _(knownMapping).map(function(x) {
         return x.uri;
       });
-      knownPrefixes = _.intersect(allKnownPrefixes, types);
+      knownPrefixes = _.intersection(allKnownPrefixes, types);
       return _(knownPrefixes).map(function(key) {
         var foundPrefix;
-        foundPrefix = _(knownMapping).detect(function(x) {
+        foundPrefix = _(knownMapping).find(function(x) {
           return x.uri === key;
         });
         return foundPrefix.label;
@@ -885,7 +885,7 @@
       if (!src) this._logger.warn("No source");
       if (!src) return "";
       sources = this.options.getSources();
-      sourceObj = _(sources).detect(function(s) {
+      sourceObj = _(sources).find(function(s) {
         return src.indexOf(s.uri) !== -1;
       });
       if (sourceObj) {
@@ -1042,11 +1042,11 @@
     _getDepiction: function(entity, picSize) {
       var depictionUrl, field, fieldValue, preferredFields;
       preferredFields = this.options.depictionProperties;
-      field = _(preferredFields).detect(function(field) {
+      field = _(preferredFields).find(function(field) {
         if (entity.get(field)) return true;
       });
       if (field && (fieldValue = _([entity.get(field)]).flatten())) {
-        depictionUrl = _(fieldValue).detect(function(uri) {
+        depictionUrl = _(fieldValue).find(function(uri) {
           uri = (typeof uri.getSubject === "function" ? uri.getSubject() : void 0) || uri;
           if (uri.indexOf("thumb") !== -1) return true;
         }).replace(/[0-9]{2..3}px/, "" + picSize + "px");
@@ -1074,7 +1074,7 @@
           property = preferredFields[_j];
           if (typeof property === "string" && entity.get(property)) {
             labelArr = _.flatten([entity.get(property)]);
-            label = _(labelArr).detect(function(label) {
+            label = _(labelArr).find(function(label) {
               if (typeof label === "string" && label.toString().indexOf("@" + lang) > -1) {
                 true;
               }
