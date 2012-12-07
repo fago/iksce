@@ -8,6 +8,7 @@ features[content][] = location-salzburg
 features[content][] = org-salzburg-research
 features[content][] = person-john
 features[content][] = person-sergio
+features[content][] = person-wernher
 features[ctools][] = strongarm:strongarm:1
 features[features_api][] = api:1
 features[variable][] = node_content_enabled
