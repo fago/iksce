@@ -58,13 +58,6 @@ function iksce_content_content_defaults() {
         ),
       ),
     ),
-    'field_location' => array(
-      'und' => array(
-        0 => array(
-          'machine_name' => 'location-salzburg',
-        ),
-      ),
-    ),
   );
 
   $content['person-john'] = (object) array(
@@ -87,13 +80,6 @@ function iksce_content_content_defaults() {
           'safe_value' => '<p>John Pereira is a Senior Project Manager and Community Development Manager at Salzburg Research. He is specialised in the areas of public relations, marketing and community development. He holds a double major BA in Industrial Relations and Legal Studies from the University of Wollongong, New South Wales, Australia.</p>
 ',
           'safe_summary' => '',
-        ),
-      ),
-    ),
-    'field_affiliation' => array(
-      'und' => array(
-        0 => array(
-          'machine_name' => 'org-salzburg-research',
         ),
       ),
     ),
@@ -139,13 +125,6 @@ function iksce_content_content_defaults() {
         ),
       ),
     ),
-    'field_affiliation' => array(
-      'und' => array(
-        0 => array(
-          'machine_name' => 'org-salzburg-research',
-        ),
-      ),
-    ),
     'field_picture' => array(
       'und' => array(
         0 => array(
@@ -185,13 +164,6 @@ function iksce_content_content_defaults() {
           'safe_value' => '<p>Wernher Behrendt is Senior Researcher at Salzburg Research. He is co-ordinator of the IKS Project which is bringing semantic technologies to open source content management systems. One of his on-going research interests is the notion of knowledge content objects which are intended to capture human-readable knowledge as well as the “translation” of that knowledge into machine-readable representations.</p>
 ',
           'safe_summary' => '',
-        ),
-      ),
-    ),
-    'field_affiliation' => array(
-      'und' => array(
-        0 => array(
-          'machine_name' => 'org-salzburg-research',
         ),
       ),
     ),
