@@ -100,13 +100,25 @@ function iksce_content_content_defaults() {
       'und' => array(
         0 => array(
           'value' => 'Director General<br>
-Chief Operating Officer',
+Chief Operating Officer
+
+Source: http://www.defra.gov.uk/corporate/about/who/management/',
           'summary' => '',
           'format' => 'filtered_html',
           'safe_value' => '<p>Director General<br />
 Chief Operating Officer</p>
+<p>Source: <a href="http://www.defra.gov.uk/corporate/about/who/management/">http://www.defra.gov.uk/corporate/about/who/management/</a></p>
 ',
           'safe_summary' => '',
+        ),
+      ),
+    ),
+    'field_affiliation_text' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'Department for Environment, Food and Rural Affairs',
+          'format' => NULL,
+          'safe_value' => 'Department for Environment, Food and Rural Affairs',
         ),
       ),
     ),
@@ -127,15 +139,6 @@ Chief Operating Officer</p>
         ),
       ),
     ),
-    'field_affiliation_text' => array(
-      'und' => array(
-        0 => array(
-          'value' => 'Department for Environment, Food and Rural Affairs',
-          'format' => NULL,
-          'safe_value' => 'Department for Environment, Food and Rural Affairs',
-        ),
-      ),
-    ),
   );
 
   $content['person-Tom-Taylor'] = (object) array(
@@ -152,12 +155,24 @@ Chief Operating Officer</p>
     'body' => array(
       'und' => array(
         0 => array(
-          'value' => 'Finance Director',
+          'value' => 'Finance Director
+
+Source: http://www.defra.gov.uk/corporate/about/who/management/',
           'summary' => '',
           'format' => 'filtered_html',
           'safe_value' => '<p>Finance Director</p>
+<p>Source: <a href="http://www.defra.gov.uk/corporate/about/who/management/">http://www.defra.gov.uk/corporate/about/who/management/</a></p>
 ',
           'safe_summary' => '',
+        ),
+      ),
+    ),
+    'field_affiliation_text' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'Department for Environment, Food and Rural Affairs',
+          'format' => NULL,
+          'safe_value' => 'Department for Environment, Food and Rural Affairs',
         ),
       ),
     ),
@@ -178,15 +193,6 @@ Chief Operating Officer</p>
         ),
       ),
     ),
-    'field_affiliation_text' => array(
-      'und' => array(
-        0 => array(
-          'value' => 'Department for Environment, Food and Rural Affairs',
-          'format' => NULL,
-          'safe_value' => 'Department for Environment, Food and Rural Affairs',
-        ),
-      ),
-    ),
   );
 
   $content['person-bronwyn-hill'] = (object) array(
@@ -204,12 +210,24 @@ Chief Operating Officer</p>
       'und' => array(
         0 => array(
           'value' => '<strong>
-</strong>Permanent Secretary',
+</strong>Permanent Secretary
+
+Source: http://www.defra.gov.uk/corporate/about/who/management/',
           'summary' => '',
           'format' => 'filtered_html',
           'safe_value' => '<p><strong><br /></strong>Permanent Secretary</p>
+<p>Source: <a href="http://www.defra.gov.uk/corporate/about/who/management/">http://www.defra.gov.uk/corporate/about/who/management/</a></p>
 ',
           'safe_summary' => '',
+        ),
+      ),
+    ),
+    'field_affiliation_text' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'Department for Environment, Food and Rural Affairs',
+          'format' => NULL,
+          'safe_value' => 'Department for Environment, Food and Rural Affairs',
         ),
       ),
     ),
@@ -230,19 +248,10 @@ Chief Operating Officer</p>
         ),
       ),
     ),
-    'field_affiliation_text' => array(
-      'und' => array(
-        0 => array(
-          'value' => 'Department for Environment, Food and Rural Affairs',
-          'format' => NULL,
-          'safe_value' => 'Department for Environment, Food and Rural Affairs',
-        ),
-      ),
-    ),
   );
 
   $content['person-david-heath'] = (object) array(
-    'title' => 'David Heath MP',
+    'title' => 'David Heath',
     'status' => '1',
     'promote' => '1',
     'sticky' => '0',
@@ -258,15 +267,27 @@ Chief Operating Officer</p>
           'value' => '<p>David Heath has been the MP for Somerton and Frome, a rural 
 constituency and important dairy farming area, since 1997. Before this 
 he served as Leader of Somerset County Council and also acted as 
-Parliamentary consultant for the World Wide Fund for Nature.</p>',
+Parliamentary consultant for the World Wide Fund for Nature.</p>
+
+Source: http://www.defra.gov.uk/corporate/about/who/management/',
           'summary' => '',
           'format' => 'filtered_html',
           'safe_value' => '<p>David Heath has been the MP for Somerton and Frome, a rural<br />
 constituency and important dairy farming area, since 1997. Before this<br />
 he served as Leader of Somerset County Council and also acted as<br />
 Parliamentary consultant for the World Wide Fund for Nature.</p>
+<p>Source: <a href="http://www.defra.gov.uk/corporate/about/who/management/">http://www.defra.gov.uk/corporate/about/who/management/</a></p>
 ',
           'safe_summary' => '',
+        ),
+      ),
+    ),
+    'field_affiliation_text' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'Department for Environment, Food and Rural Affairs',
+          'format' => NULL,
+          'safe_value' => 'Department for Environment, Food and Rural Affairs',
         ),
       ),
     ),
@@ -284,15 +305,6 @@ Parliamentary consultant for the World Wide Fund for Nature.</p>
           'status' => '1',
           'rdf_mapping' => array(),
           'image' => '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',
-        ),
-      ),
-    ),
-    'field_affiliation_text' => array(
-      'und' => array(
-        0 => array(
-          'value' => 'Department for Environment, Food and Rural Affairs',
-          'format' => NULL,
-          'safe_value' => 'Department for Environment, Food and Rural Affairs',
         ),
       ),
     ),
@@ -355,13 +367,25 @@ Parliamentary consultant for the World Wide Fund for Nature.</p>
       'und' => array(
         0 => array(
           'value' => 'Director General<br>
-Strategy, Evidence and Customers',
+Strategy, Evidence and Customers
+
+Source: http://www.defra.gov.uk/corporate/about/who/management/',
           'summary' => '',
           'format' => 'filtered_html',
           'safe_value' => '<p>Director General<br />
 Strategy, Evidence and Customers</p>
+<p>Source: <a href="http://www.defra.gov.uk/corporate/about/who/management/">http://www.defra.gov.uk/corporate/about/who/management/</a></p>
 ',
           'safe_summary' => '',
+        ),
+      ),
+    ),
+    'field_affiliation_text' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'Department for Environment, Food and Rural Affairs',
+          'format' => NULL,
+          'safe_value' => 'Department for Environment, Food and Rural Affairs',
         ),
       ),
     ),
@@ -379,15 +403,6 @@ Strategy, Evidence and Customers</p>
           'status' => '1',
           'rdf_mapping' => array(),
           'image' => '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',
-        ),
-      ),
-    ),
-    'field_affiliation_text' => array(
-      'und' => array(
-        0 => array(
-          'value' => 'Department for Environment, Food and Rural Affairs',
-          'format' => NULL,
-          'safe_value' => 'Department for Environment, Food and Rural Affairs',
         ),
       ),
     ),
@@ -411,7 +426,9 @@ Strategy, Evidence and Customers</p>
 Government Whip in the Lords since 2010, as well as being Government 
 spokesman on environment, food and rural affairs issues. In Opposition 
 he held a number of briefs, including serving as Shadow Minister for 
-Business, Innovation and Skills.</p>',
+Business, Innovation and Skills.</p>
+
+Source: http://www.defra.gov.uk/corporate/about/who/management/',
           'summary' => '',
           'format' => 'filtered_html',
           'safe_value' => '<p>Lord de Mauley, whose family has a farming background, has been a<br />
@@ -419,8 +436,18 @@ Government Whip in the Lords since 2010, as well as being Government<br />
 spokesman on environment, food and rural affairs issues. In Opposition<br />
 he held a number of briefs, including serving as Shadow Minister for<br />
 Business, Innovation and Skills.</p>
+<p>Source: <a href="http://www.defra.gov.uk/corporate/about/who/management/">http://www.defra.gov.uk/corporate/about/who/management/</a></p>
 ',
           'safe_summary' => '',
+        ),
+      ),
+    ),
+    'field_affiliation_text' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'Department for Environment, Food and Rural Affairs',
+          'format' => NULL,
+          'safe_value' => 'Department for Environment, Food and Rural Affairs',
         ),
       ),
     ),
@@ -441,19 +468,10 @@ Business, Innovation and Skills.</p>
         ),
       ),
     ),
-    'field_affiliation_text' => array(
-      'und' => array(
-        0 => array(
-          'value' => 'Department for Environment, Food and Rural Affairs',
-          'format' => NULL,
-          'safe_value' => 'Department for Environment, Food and Rural Affairs',
-        ),
-      ),
-    ),
   );
 
   $content['person-owen-paterson'] = (object) array(
-    'title' => 'Owen Paterson MP',
+    'title' => 'Owen Paterson',
     'status' => '1',
     'promote' => '1',
     'sticky' => '0',
@@ -470,7 +488,9 @@ Business, Innovation and Skills.</p>
 <p>Owen Paterson has been MP for North Shropshire since 1997. In 
 opposition, Mr Paterson held positions as Shadow Agricultural Whip, 
 Shadow Minister for Agriculture, Shadow Minister for Transport and 
-Shadow Secretary of State for Northern Ireland.</p>',
+Shadow Secretary of State for Northern Ireland.</p>
+
+Source: http://www.defra.gov.uk/corporate/about/who/management/',
           'summary' => '',
           'format' => 'filtered_html',
           'safe_value' => '<p>Owen Paterson joined Defra after serving in the Cabinet as Secretary of State for Northern Ireland from May 2010.<br />
@@ -478,8 +498,18 @@ Owen Paterson has been MP for North Shropshire since 1997. In<br />
 opposition, Mr Paterson held positions as Shadow Agricultural Whip,<br />
 Shadow Minister for Agriculture, Shadow Minister for Transport and<br />
 Shadow Secretary of State for Northern Ireland.</p>
+<p>Source: <a href="http://www.defra.gov.uk/corporate/about/who/management/">http://www.defra.gov.uk/corporate/about/who/management/</a></p>
 ',
           'safe_summary' => '',
+        ),
+      ),
+    ),
+    'field_affiliation_text' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'Department for Environment, Food and Rural Affairs',
+          'format' => NULL,
+          'safe_value' => 'Department for Environment, Food and Rural Affairs',
         ),
       ),
     ),
@@ -500,15 +530,6 @@ Shadow Secretary of State for Northern Ireland.</p>
         ),
       ),
     ),
-    'field_affiliation_text' => array(
-      'und' => array(
-        0 => array(
-          'value' => 'Department for Environment, Food and Rural Affairs',
-          'format' => NULL,
-          'safe_value' => 'Department for Environment, Food and Rural Affairs',
-        ),
-      ),
-    ),
   );
 
   $content['person-peter-unwin'] = (object) array(
@@ -526,13 +547,25 @@ Shadow Secretary of State for Northern Ireland.</p>
       'und' => array(
         0 => array(
           'value' => 'Director General<br>
-Policy Delivery',
+Policy Delivery
+
+Source: http://www.defra.gov.uk/corporate/about/who/management/',
           'summary' => '',
           'format' => 'filtered_html',
           'safe_value' => '<p>Director General<br />
 Policy Delivery</p>
+<p>Source: <a href="http://www.defra.gov.uk/corporate/about/who/management/">http://www.defra.gov.uk/corporate/about/who/management/</a></p>
 ',
           'safe_summary' => '',
+        ),
+      ),
+    ),
+    'field_affiliation_text' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'Department for Environment, Food and Rural Affairs',
+          'format' => NULL,
+          'safe_value' => 'Department for Environment, Food and Rural Affairs',
         ),
       ),
     ),
@@ -553,19 +586,10 @@ Policy Delivery</p>
         ),
       ),
     ),
-    'field_affiliation_text' => array(
-      'und' => array(
-        0 => array(
-          'value' => 'Department for Environment, Food and Rural Affairs',
-          'format' => NULL,
-          'safe_value' => 'Department for Environment, Food and Rural Affairs',
-        ),
-      ),
-    ),
   );
 
   $content['person-richard-benyon'] = (object) array(
-    'title' => 'Richard Benyon MP',
+    'title' => 'Richard Benyon',
     'status' => '1',
     'promote' => '1',
     'sticky' => '0',
@@ -581,15 +605,27 @@ Policy Delivery</p>
           'value' => '<p>Richard Benyon has been MP for Newbury since May 2005. Before coming 
 to government Mr Benyon served as a Shadow Minister for the Environment,
  Fisheries and Wildlife. Prior to this appointment he was a Party Whip.&nbsp;
- He has also served on the Home Affairs Select Committee.</p>',
+ He has also served on the Home Affairs Select Committee.</p>
+
+Source: http://www.defra.gov.uk/corporate/about/who/management/',
           'summary' => '',
           'format' => 'filtered_html',
           'safe_value' => '<p>Richard Benyon has been MP for Newbury since May 2005. Before coming<br />
 to government Mr Benyon served as a Shadow Minister for the Environment,<br />
  Fisheries and Wildlife. Prior to this appointment he was a Party Whip. <br />
  He has also served on the Home Affairs Select Committee.</p>
+<p>Source: <a href="http://www.defra.gov.uk/corporate/about/who/management/">http://www.defra.gov.uk/corporate/about/who/management/</a></p>
 ',
           'safe_summary' => '',
+        ),
+      ),
+    ),
+    'field_affiliation_text' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'Department for Environment, Food and Rural Affairs',
+          'format' => NULL,
+          'safe_value' => 'Department for Environment, Food and Rural Affairs',
         ),
       ),
     ),
@@ -607,15 +643,6 @@ to government Mr Benyon served as a Shadow Minister for the Environment,<br />
           'status' => '1',
           'rdf_mapping' => array(),
           'image' => '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',
-        ),
-      ),
-    ),
-    'field_affiliation_text' => array(
-      'und' => array(
-        0 => array(
-          'value' => 'Department for Environment, Food and Rural Affairs',
-          'format' => NULL,
-          'safe_value' => 'Department for Environment, Food and Rural Affairs',
         ),
       ),
     ),
