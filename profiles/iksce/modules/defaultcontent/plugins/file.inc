@@ -35,48 +35,66 @@ function file_export_alter(&$node) {
 }
 
 /**
- * Prepares file field for import
+ * Prepares file field for import.
  *
- * Create the file and attached the new file object in the file field
+ * Create the file and attach the new file object in the file field.
  */
 function file_import_alter(&$node) {
   $fields = get_file_fields();
   foreach ($fields as $field_name => $field) {
     if (isset($node->{$field_name})) {
-      //unset($node->{$field_name});
-    }
-    if (isset($node->{$field_name})) {
       foreach ($node->{$field_name} as $lang => $items) {
         foreach ($items as $key => $item) {
-          $file = (object) $item;
-          $query = new EntityFieldQuery();
-          $fids = db_select('file_managed', 'f')
-            ->condition('uri', $file->uri)
-            ->fields('f', array('fid'))
-            ->execute()
-            ->fetchCol();
-          if (!empty($fids) && isset($fids[0]) && is_object($fids[0])) {
-            file_delete($fid[0]);
+          if (isset($item['filename'])) {
+            $file = (object) $item;
+
+            // Reuse any already imported files
+            $fids = db_select('file_managed', 'f')
+              ->condition('uri', $file->uri)
+              ->fields('f', array('fid'))
+              ->execute()
+              ->fetchCol();
+            if (!empty($fids) && isset($fids[0])) {
+              $result = $file;
+              $result->fid = $fids[0];
+            }
+            else {
+
+              // There is no file, so prepare to save. Exports store all file
+              // data in the 'image' key.
+              if (isset($file->image)) {
+                // Decode file data. Older versions exported binary data
+                // so if this fails we assume that is the reason.
+                $data = base64_decode($file->image);
+                if (!isset($data) || empty($data)) {
+                  $data = $file->image;
+                }
+              }
+
+              // For images, save data, for files, just save.
+              if (isset($data) && !empty($data)) {
+                $result = file_save_data($data, $file->uri);
+              }
+              else {
+                $result = file_save($file);
+              }
+            }
+
+            // Add the file to the node for saving.
+            if (isset($result) || !empty($result)) {
+              $result->display = 1;
+              $node->{$field_name}[$lang][$key] = (array) $result;
+            }
+            else {
+              watchdog('defaultcontent', 'Import of file failed.', array(), WATCHDOG_ERROR);
+            }
           }
-          $file = file_save_data($item['image'], $item['uri']);
-          // Decode image data. Older versions exported binary data
-          // so if this fails we asume that is the reason.
-          $data = base64_decode($item['image']);
-          if (!$data) {
-            $data = $item['image'];
+          else {
+            // This export is probably broken. Remove it so the node can be
+            // saved.
+            unset($node->{$field_name}[$lang][$key]);
+            watchdog('defaultcontent', 'Could not import file. The imported data was incomplete.', array(), WATCHDOG_ERROR);
           }
-          $file = file_save_data($data, $item['uri']);
-          if ($field['type'] == 'image') {
-            $file->alt = $item['alt'];
-            $file->title = $item['title'];
-          }
-          elseif ($field['type'] == 'file') {
-            $file->display = $item['display'];
-            $file->description = $item['description'];
-          }
-          file_save($file);
-          $node->{$field_name}[$lang][$key] = (array) $file;
-          //unset($node->{$field_name}[$lang][$key]);
         }
       }
     }
