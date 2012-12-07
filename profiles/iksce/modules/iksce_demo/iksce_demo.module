@@ -34,6 +34,12 @@ function iksce_demo_entity_rdf_mappings() {
         ),
       ),
     ),
+    'node:person:field_affiliation' => array(
+      'rdf properties' => array('http://schema.org/affiliation'),
+    ),
+    'node:person:field_affiliation_text' => array(
+      'rdf properties' => array('http://schema.org/affiliation'),
+    ),
     'node:person:field_picture' => array(
       'rdf properties' => array('http://xmlns.com/foaf/0.1/depiction'),
       'rdf resource' => '[node:field-picture:file:url]',
