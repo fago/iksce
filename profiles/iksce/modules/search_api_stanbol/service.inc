@@ -254,7 +254,7 @@ class SearchApiStanbolService extends SearchApiAbstractService {
         return $ret;
       }
       throw new SearchApiException(t('HTTP status @status: @msg.',
-          array('@status' => $response->code, '@msg' => $response->status_message)));
+          array('@status' => $response->code, '@msg' => $response->error)));
     }
     catch (Exception $e) {
       watchdog_exception('search_api_stanbol', $e, "%type while indexing: !message in %function (line %line of %file).");
