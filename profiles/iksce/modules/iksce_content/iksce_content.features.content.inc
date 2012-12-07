@@ -177,13 +177,6 @@ His recent projects as manager include, DigiCULT Forum, provideing technology mo
         ),
       ),
     ),
-    'field_affiliation' => array(
-      'und' => array(
-        0 => array(
-          'target_id' => '3',
-        ),
-      ),
-    ),
     'field_picture' => array(
       'und' => array(
         0 => array(
