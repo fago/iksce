@@ -36,6 +36,7 @@ function vie_autocomplete_field_widget_form(&$form, &$form_state, $field, $insta
     'js' => array(drupal_get_path('module', 'vie_autocomplete') . '/vie_autocomplete.js'),
   );
 
+
   $element['value'] = array(
     '#type' => 'textfield',
     '#default_value' => !empty($tags[$delta]) ? $tags[$delta]->name : NULL,
@@ -65,7 +66,7 @@ function vie_autocomplete_widget_validate($element, &$form_state) {
   $parent_element = drupal_array_get_nested_value($form_state['complete form'], $parents);
   $parent_value = drupal_array_get_nested_value($form_state['values'], $parent_element['#parents']);
 
-  $value = array();
+  $value = array('tid' => FALSE);
 
   if ($tag = $element['#value']) {
     // Collect candidate vocabularies.

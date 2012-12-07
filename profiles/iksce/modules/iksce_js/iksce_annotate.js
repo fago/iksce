@@ -86,7 +86,7 @@
       var image = Drupal.settings.basePath + 'profiles/iksce/libraries/nicedit/nicEditorIcons.gif';
 
       // Add a custom button to niceEdit. Ugly html copied over and adapted.
-      $('.nicEdit-panel').append(
+      $('.nicEdit-panel').once('iksce_annotate').append(
         '<div style="float: left; margin-top: 2px;">' +
           '<div style="height: 20px; opacity: 1;" class=" nicEdit-buttonContain      nicEdit-buttonEnabled">' +
           '<div style="margin: 0px 5px; background-color: rgb(239, 239, 239); border: 1px solid rgb(239, 239, 239);" class=" nicEdit-button-undefined nicEdit-button-hover nicEdit-button-active">' +
