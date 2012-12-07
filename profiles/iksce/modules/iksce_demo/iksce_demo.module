@@ -69,5 +69,23 @@ function iksce_demo_entity_rdf_mappings() {
       ),
     ),
 
+    // taxonomy vocabulary mappings (bundle, property and field property mappings).
+    'taxonomy_term:tags' => array(
+      'rdf types' => array('http://www.w3.org/2004/02/skos/core#Concept'),
+    ),
+    'taxonomy_term:tags:name' => array(
+      'rdf properties' => array('http://schema.org/name'),
+    ),
+    'taxonomy_term:tags:description' => array(
+      'rdf properties' => array('http://schema.org/description'),
+    ),
+    'taxonomy_term:tags:field_uri' => array(
+      'field properties' => array(
+        'url' => array(
+          'rdf properties' => array('http://www.w3.org/2002/07/owl#sameAs'),
+        ),
+      ),
+    ),
+
   );
 }
