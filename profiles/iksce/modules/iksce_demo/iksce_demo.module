@@ -20,7 +20,7 @@ function iksce_demo_rdf_namespaces() {
  */
 function iksce_demo_entity_rdf_mappings() {
   return array(
-    // node person mappings (bundle, property and field property mappings).
+    // content type person mappings (bundle, property and field property mappings).
     'node:person' => array(
       'rdf types' => array('http://schema.org/Person'),
     ),
@@ -38,5 +38,36 @@ function iksce_demo_entity_rdf_mappings() {
       'rdf properties' => array('http://xmlns.com/foaf/0.1/depiction'),
       'rdf resource' => '[node:field-picture:file:url]',
     ),
+
+    // content type organization mappings (bundle, property and field property mappings).
+    'node:organization' => array(
+      'rdf types' => array('http://schema.org/Organization'),
+    ),
+    'node:organization:title' => array(
+      'rdf properties' => array('http://schema.org/name'),
+    ),
+    'node:organization:body' => array(
+      'field properties' => array(
+        'value' => array(
+          'rdf properties' => array('http://schema.org/description'),
+        ),
+      ),
+    ),
+
+    // content type location mappings (bundle, property and field property mappings).
+    'node:location' => array(
+      'rdf types' => array('http://schema.org/Place'),
+    ),
+    'node:location:title' => array(
+      'rdf properties' => array('http://schema.org/name'),
+    ),
+    'node:location:body' => array(
+      'field properties' => array(
+        'value' => array(
+          'rdf properties' => array('http://schema.org/description'),
+        ),
+      ),
+    ),
+
   );
 }
