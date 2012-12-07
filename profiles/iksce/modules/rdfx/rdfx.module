@@ -20,7 +20,6 @@ else {
  * Implements hook_init().
  */
 function rdfx_init() {
-  debug(RDF_ARC2_PATH);
   // Attempts to load the ARC2 library, if available.
   if (!class_exists('ARC2') && file_exists(RDF_ARC2_PATH . '/ARC2.php')) {
     @include_once RDF_ARC2_PATH . '/ARC2.php';
