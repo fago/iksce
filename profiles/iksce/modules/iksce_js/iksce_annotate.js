@@ -4,7 +4,7 @@
   var selector = '.nicEdit-main';
 
   var options = {
-    autoAccept : false,
+    autoAccept : true,
     debug : true
   };
 
@@ -53,11 +53,14 @@
       $(button).find('.text').html('...');
       $(button).closest('.form-textarea-wrapper').find(selector)
         .each(function() {
-          $(this)
-            .annotate('enable', function(success){
+          var content = this;
+          $(content)
+            .annotate('enable', function(success) {
               $(button).find('.text').html(Drupal.t('Annotate'));
+              logger.log('finished')
+
               if (success && options.autoAccept) {
-                Drupal.iksce_annotate.acceptAll();
+                Drupal.iksce_annotate.acceptAll(content);
               }
               else if (!success) {
                 $(button).find('.text').html(Drupal.t('Error!'));
@@ -67,14 +70,10 @@
         });
     },
 
-    acceptAll : function() {
-      $(selector)
-        .each(function() {
-          $(this)
-            .annotate('acceptAll', function(report) {
-              logger.log('AcceptAll finished with the report:', report);
-            });
-        })
+    acceptAll : function(content) {
+      $(content).annotate('acceptAll', function(report) {
+        logger.log('AcceptAll finished with the report:', report);
+      });
     }
   }
 
@@ -93,12 +92,12 @@
           '<div class="text" style="height: 18px; overflow: hidden; cursor: pointer;" class=" nicEdit-button" unselectable="on">' + Drupal.t('Annotate') + '</div>' +
           '</div></div></div>').bind('click', function() {
 
+          Drupal.iksce_annotate.instantiate();
           Drupal.iksce_annotate.enable(this);
         });
 
 
-      Drupal.iksce_annotate.instantiate();
-      console.log('run');
+      console.log('init');
     }
   };
 

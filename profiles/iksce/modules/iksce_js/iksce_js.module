@@ -24,7 +24,7 @@ function iksce_js_init() {
 function iksce_vie_stanbol_config() {
   // This are the settings as passed to "new vie.StanbolService" in js.
   return array(
-    'url' => 'http://dev.iks-project.eu/stanbolfull',
+    'url' => 'http://localhost:8080',
     'proxyDisabled' => TRUE,
   );
 }
