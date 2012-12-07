@@ -1,6 +1,6 @@
-name = iksce_demo
+name = IKSce Demo
 core = 7.x
-package = Features
+package = IKSce Demo
 php = 5.2.4
 dependencies[] = ctools
 dependencies[] = entity

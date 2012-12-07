@@ -1,6 +1,6 @@
-name = iksce_content
+name = IKSce Content
 core = 7.x
-package = Features
+IKSce Demo
 php = 5.2.4
 dependencies[] = defaultcontent
 dependencies[] = iksce_demo
