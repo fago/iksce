@@ -10,6 +10,63 @@
 function iksce_content_content_defaults() {
   $content = array();
 
+  $content['location-salzburg'] = (object) array(
+    'title' => 'Salzburg, Austria',
+    'status' => '1',
+    'promote' => '1',
+    'sticky' => '0',
+    'type' => 'location',
+    'language' => 'und',
+    'created' => '1354840693',
+    'comment' => '1',
+    'translate' => '0',
+    'machine_name' => 'location-salzburg',
+    'body' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'Salzburg is the fourth-largest city in Austria and the capital city of the federal state of Salzburg. Salzburg\'s "Old Town" (Altstadt) has internationally renowned baroque architecture and one of the best-preserved city centres north of the Alps. It was listed as a UNESCO World Heritage Site in 1997. The city is noted for its Alpine setting.',
+          'summary' => '',
+          'format' => 'filtered_html',
+          'safe_value' => '<p>Salzburg is the fourth-largest city in Austria and the capital city of the federal state of Salzburg. Salzburg\'s "Old Town" (Altstadt) has internationally renowned baroque architecture and one of the best-preserved city centres north of the Alps. It was listed as a UNESCO World Heritage Site in 1997. The city is noted for its Alpine setting.</p>
+',
+          'safe_summary' => '',
+        ),
+      ),
+    ),
+  );
+
+  $content['org-salzburg-research'] = (object) array(
+    'title' => 'Salzburg Research Forschungsgesellschaft mbH',
+    'status' => '1',
+    'promote' => '1',
+    'sticky' => '0',
+    'type' => 'organization',
+    'language' => 'und',
+    'created' => '1354840635',
+    'comment' => '1',
+    'translate' => '0',
+    'machine_name' => 'org-salzburg-research',
+    'body' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'Salzburg Research Forschungsgesellschaft mbH ist a non-academic research institute in Austria. The research technology organisation specializes in applied research and development in the field of information and communication technologies (ICT) and New Media.',
+          'summary' => '',
+          'format' => 'filtered_html',
+          'safe_value' => '<p>Salzburg Research Forschungsgesellschaft mbH ist a non-academic research institute in Austria. The research technology organisation specializes in applied research and development in the field of information and communication technologies (ICT) and New Media.</p>
+',
+          'safe_summary' => '',
+        ),
+      ),
+    ),
+    'field_location' => array(
+      'und' => array(
+        0 => array(
+          'target_id' => '4',
+        ),
+      ),
+    ),
+  );
+
   $content['person-john'] = (object) array(
     'title' => 'John Pereira',
     'status' => '1',
