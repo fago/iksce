@@ -268,7 +268,7 @@ class SearchApiStanbolService extends SearchApiAbstractService {
   public function getMergedResources(array $resources) {
     $index = array();
     $ns = array();
-    $collection = new ARC2_Resource();
+    $collection = ARC2::getResource();
 
     foreach ($resources as $resource) {
       // Merge namespaces.
