@@ -4,6 +4,7 @@ package = Features
 php = 5.2.4
 dependencies[] = defaultcontent
 dependencies[] = strongarm
+dependencies[] = iksce_demo
 features[content][] = location-salzburg
 features[content][] = org-salzburg-research
 features[content][] = person-john
