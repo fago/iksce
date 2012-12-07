@@ -60,6 +60,31 @@ function iksce_content_content_defaults() {
     ),
   );
 
+  $content['org-uk-defra'] = (object) array(
+    'title' => 'UK Department for Environment, Food and Rural Affairs',
+    'status' => '1',
+    'promote' => '1',
+    'sticky' => '0',
+    'type' => 'organization',
+    'language' => 'und',
+    'created' => '1354896374',
+    'comment' => '1',
+    'translate' => '0',
+    'machine_name' => 'org-uk-defra',
+    'body' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'The UK Government department tasked with issues such as the environment, rural development, the countryside, wildlife, animal welfare and sustainable ...',
+          'summary' => '',
+          'format' => 'filtered_html',
+          'safe_value' => '<p>The UK Government department tasked with issues such as the environment, rural development, the countryside, wildlife, animal welfare and sustainable ...</p>
+',
+          'safe_summary' => '',
+        ),
+      ),
+    ),
+  );
+
   $content['person-Ian-Trenholm'] = (object) array(
     'title' => 'Ian Trenholm',
     'status' => '1',

@@ -7,6 +7,7 @@ dependencies[] = iksce_demo
 dependencies[] = strongarm
 features[content][] = location-salzburg
 features[content][] = org-salzburg-research
+features[content][] = org-uk-defra
 features[content][] = person-Ian-Trenholm
 features[content][] = person-Tom-Taylor
 features[content][] = person-bronwyn-hill
