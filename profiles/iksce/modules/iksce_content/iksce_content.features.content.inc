@@ -17,7 +17,7 @@ function iksce_content_content_defaults() {
     'sticky' => '0',
     'type' => 'location',
     'language' => 'und',
-    'created' => '1354840693',
+    'created' => '1354754293',
     'comment' => '1',
     'translate' => '0',
     'machine_name' => 'location-salzburg',
@@ -42,7 +42,7 @@ function iksce_content_content_defaults() {
     'sticky' => '0',
     'type' => 'organization',
     'language' => 'und',
-    'created' => '1354840635',
+    'created' => '1354754235',
     'comment' => '1',
     'translate' => '0',
     'machine_name' => 'org-salzburg-research',
@@ -61,7 +61,7 @@ function iksce_content_content_defaults() {
     'field_location' => array(
       'und' => array(
         0 => array(
-          'target_id' => '4',
+          'machine_name' => 'location-salzburg',
         ),
       ),
     ),
@@ -81,15 +81,19 @@ function iksce_content_content_defaults() {
     'body' => array(
       'und' => array(
         0 => array(
-          'value' => 'John Pereira is a Senior Project Manager and Community Development Manager at Salzburg Research. He is specialised in the areas of public relations, marketing and community development. He holds a double major BA in Industrial Relations and Legal Studies from the University of Wollongong, New South Wales, Australia.
-
-His recent projects as manager include, DigiCULT Forum, provideing technology monitoring services for the European cultural heritage sector; Heritage Alive!, which developed mobile solutions for UNESCO World Heritage Sites, and Knappensteig, which developmed a Touristic mobile solution for the ctiy of Hallein. He also led the Exploitation and Dissemination Panel for the EU-IST (FP6-IP) project LIVE “Live Staging of Media Events”, a large-scale research and development project developing new media technologies for the real-time non-linear TV broadcast of large mass media events, such as the Olympics.',
+          'value' => 'John Pereira is a Senior Project Manager and Community Development Manager at Salzburg Research. He is specialised in the areas of public relations, marketing and community development. He holds a double major BA in Industrial Relations and Legal Studies from the University of Wollongong, New South Wales, Australia.',
           'summary' => '',
           'format' => 'filtered_html',
           'safe_value' => '<p>John Pereira is a Senior Project Manager and Community Development Manager at Salzburg Research. He is specialised in the areas of public relations, marketing and community development. He holds a double major BA in Industrial Relations and Legal Studies from the University of Wollongong, New South Wales, Australia.</p>
-<p>His recent projects as manager include, DigiCULT Forum, provideing technology monitoring services for the European cultural heritage sector; Heritage Alive!, which developed mobile solutions for UNESCO World Heritage Sites, and Knappensteig, which developmed a Touristic mobile solution for the ctiy of Hallein. He also led the Exploitation and Dissemination Panel for the EU-IST (FP6-IP) project LIVE “Live Staging of Media Events”, a large-scale research and development project developing new media technologies for the real-time non-linear TV broadcast of large mass media events, such as the Olympics.</p>
 ',
           'safe_summary' => '',
+        ),
+      ),
+    ),
+    'field_affiliation' => array(
+      'und' => array(
+        0 => array(
+          'machine_name' => 'org-salzburg-research',
         ),
       ),
     ),
@@ -126,12 +130,19 @@ His recent projects as manager include, DigiCULT Forum, provideing technology mo
     'body' => array(
       'und' => array(
         0 => array(
-          'value' => 'Sergio Fernández received his B.Sc. in Computer Science (University of Oviedo, 2006) and his M.Sc on Web Engineering (University of Oviedo, 2010), complemented with postgraduate studies about Innovation Management and Business Development (University of Oviedo, 2008). His bachelor degree dissertation, SWAML, received the Spanish University Free Software award (Seville, 2007) and because it and his participation on the SIOC project he has done an internship in DERI NUI Galway (Ireland). After working for more than six years as Research Assistant at CTIC Foundation (Spain), in 2012 he joined as Senior Researcher the Knowledge and Media Technologies department of Salzburg Research (Austria), whereby he takes part in several national and European R&D projects and related initiatives. He has strong skills on applied research and its applicability to the industry. Sergio has published around twenty publications about Web Science, on the topics such as Data Integration, Social Semantic Web and Linked Data. He combines his research with some lecturing activities at universities and private centers. Also, he has proven experience on the open source software development and communities, chairing conferences, workshops and related events.',
+          'value' => 'Sergio Fernández received his B.Sc. in Computer Science (University of Oviedo, 2006) and his M.Sc on Web Engineering (University of Oviedo, 2010), complemented with postgraduate studies about Innovation Management and Business Development (University of Oviedo, 2008). His bachelor degree dissertation, SWAML, received the Spanish University Free Software award (Seville, 2007) and because it and his participation on the SIOC project he has done an internship in DERI NUI Galway (Ireland). After working for more than six years as Research Assistant at CTIC Foundation (Spain), in 2012 he joined as Senior Researcher the Knowledge and Media Technologies department of Salzburg Research (Austria), whereby he takes part in several national and European R&D projects and related initiatives.',
           'summary' => '',
           'format' => 'filtered_html',
-          'safe_value' => '<p>Sergio Fernández received his B.Sc. in Computer Science (University of Oviedo, 2006) and his M.Sc on Web Engineering (University of Oviedo, 2010), complemented with postgraduate studies about Innovation Management and Business Development (University of Oviedo, 2008). His bachelor degree dissertation, SWAML, received the Spanish University Free Software award (Seville, 2007) and because it and his participation on the SIOC project he has done an internship in DERI NUI Galway (Ireland). After working for more than six years as Research Assistant at CTIC Foundation (Spain), in 2012 he joined as Senior Researcher the Knowledge and Media Technologies department of Salzburg Research (Austria), whereby he takes part in several national and European R&amp;D projects and related initiatives. He has strong skills on applied research and its applicability to the industry. Sergio has published around twenty publications about Web Science, on the topics such as Data Integration, Social Semantic Web and Linked Data. He combines his research with some lecturing activities at universities and private centers. Also, he has proven experience on the open source software development and communities, chairing conferences, workshops and related events.</p>
+          'safe_value' => '<p>Sergio Fernández received his B.Sc. in Computer Science (University of Oviedo, 2006) and his M.Sc on Web Engineering (University of Oviedo, 2010), complemented with postgraduate studies about Innovation Management and Business Development (University of Oviedo, 2008). His bachelor degree dissertation, SWAML, received the Spanish University Free Software award (Seville, 2007) and because it and his participation on the SIOC project he has done an internship in DERI NUI Galway (Ireland). After working for more than six years as Research Assistant at CTIC Foundation (Spain), in 2012 he joined as Senior Researcher the Knowledge and Media Technologies department of Salzburg Research (Austria), whereby he takes part in several national and European R&amp;D projects and related initiatives.</p>
 ',
           'safe_summary' => '',
+        ),
+      ),
+    ),
+    'field_affiliation' => array(
+      'und' => array(
+        0 => array(
+          'machine_name' => 'org-salzburg-research',
         ),
       ),
     ),
@@ -174,6 +185,13 @@ His recent projects as manager include, DigiCULT Forum, provideing technology mo
           'safe_value' => '<p>Wernher Behrendt is Senior Researcher at Salzburg Research. He is co-ordinator of the IKS Project which is bringing semantic technologies to open source content management systems. One of his on-going research interests is the notion of knowledge content objects which are intended to capture human-readable knowledge as well as the “translation” of that knowledge into machine-readable representations.</p>
 ',
           'safe_summary' => '',
+        ),
+      ),
+    ),
+    'field_affiliation' => array(
+      'und' => array(
+        0 => array(
+          'machine_name' => 'org-salzburg-research',
         ),
       ),
     ),
