@@ -31,6 +31,7 @@ features[field][] = node-organization-field_location
 features[field][] = node-organization-field_tags
 features[field][] = node-person-body
 features[field][] = node-person-field_affiliation
+features[field][] = node-person-field_affiliation_text
 features[field][] = node-person-field_picture
 features[field][] = node-person-field_tags
 features[field][] = taxonomy_term-tags-field_uri
