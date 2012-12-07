@@ -31,7 +31,7 @@ function iksce_js_init() {
 function iksce_vie_stanbol_config() {
   // This are the settings as passed to "new vie.StanbolService" in js.
   return array(
-    'url' => 'http://localhost:8080',
+    'url' => variable_get('iksce_vie_stanbol_url', 'http://localhost:8080'),
     'proxyDisabled' => TRUE,
   );
 }
