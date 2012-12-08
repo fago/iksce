@@ -93,7 +93,7 @@ function vie_autocomplete_widget_validate($element, &$form_state) {
         'vocabulary_machine_name' => $vocabulary->machine_name,
       );
       if (!empty($parent_value['uri'])) {
-        $term['field_uri'][LANGUAGE_NONE][0]['value'] = $parent_value['uri'];
+        $term['field_uri'][LANGUAGE_NONE][0]['url'] = $parent_value['uri'];
       }
     }
     $value = (array)$term;
