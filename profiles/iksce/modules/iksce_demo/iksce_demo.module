@@ -1,0 +1,97 @@
+<?php
+/**
+ * @file
+ * Code for the iksce_demo feature.
+ */
+
+include_once 'iksce_demo.features.inc';
+
+/**
+ * Implements hook_rdf_namespaces().
+ */
+function iksce_demo_rdf_namespaces() {
+  return array(
+    'schema'   => 'http://schema.org/',
+  );
+}
+
+/**
+ * Implements hook_entity_rdf_mappings().
+ */
+function iksce_demo_entity_rdf_mappings() {
+  return array(
+    // content type person mappings (bundle, property and field property mappings).
+    'node:person' => array(
+      'rdf types' => array('http://schema.org/Person'),
+    ),
+    'node:person:title' => array(
+      'rdf properties' => array('http://schema.org/name'),
+    ),
+    'node:person:body' => array(
+      'field properties' => array(
+        'value' => array(
+          'rdf properties' => array('http://schema.org/description'),
+        ),
+      ),
+    ),
+    'node:person:field_affiliation' => array(
+      'rdf properties' => array('http://schema.org/affiliation'),
+    ),
+    'node:person:field_affiliation_text' => array(
+      'rdf properties' => array('http://schema.org/affiliation'),
+    ),
+    'node:person:field_picture' => array(
+      'rdf properties' => array('http://xmlns.com/foaf/0.1/depiction'),
+      'rdf resource' => '[node:field-picture:file:url]',
+    ),
+
+    // content type organization mappings (bundle, property and field property mappings).
+    'node:organization' => array(
+      'rdf types' => array('http://schema.org/Organization'),
+    ),
+    'node:organization:title' => array(
+      'rdf properties' => array('http://schema.org/name'),
+    ),
+    'node:organization:body' => array(
+      'field properties' => array(
+        'value' => array(
+          'rdf properties' => array('http://schema.org/description'),
+        ),
+      ),
+    ),
+
+    // content type location mappings (bundle, property and field property mappings).
+    'node:location' => array(
+      'rdf types' => array('http://schema.org/Place'),
+    ),
+    'node:location:title' => array(
+      'rdf properties' => array('http://schema.org/name'),
+    ),
+    'node:location:body' => array(
+      'field properties' => array(
+        'value' => array(
+          'rdf properties' => array('http://schema.org/description'),
+        ),
+      ),
+    ),
+
+    // taxonomy vocabulary mappings (bundle, property and field property mappings).
+    'taxonomy_term:tags' => array(
+      'rdf types' => array('http://www.w3.org/2004/02/skos/core#Concept'),
+    ),
+    'taxonomy_term:tags:name' => array(
+      'rdf properties' => array('http://schema.org/name'),
+    ),
+    'taxonomy_term:tags:description' => array(
+      'rdf properties' => array('http://schema.org/description'),
+    ),
+    'taxonomy_term:tags:field_uri' => array(
+      'field properties' => array(
+        'url' => array(
+          'rdf properties' => array('http://www.w3.org/2002/07/owl#sameAs'),
+        ),
+      ),
+    ),
+
+  );
+}

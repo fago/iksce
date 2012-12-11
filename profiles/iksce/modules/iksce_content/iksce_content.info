@@ -1,0 +1,25 @@
+name = IKSce Content
+core = 7.x
+IKSce Demo
+php = 5.2.4
+dependencies[] = defaultcontent
+dependencies[] = iksce_demo
+dependencies[] = strongarm
+features[content][] = location-salzburg
+features[content][] = org-salzburg-research
+features[content][] = org-uk-defra
+features[content][] = person-Ian-Trenholm
+features[content][] = person-Tom-Taylor
+features[content][] = person-bronwyn-hill
+features[content][] = person-david-heath
+features[content][] = person-john
+features[content][] = person-katrina-williams
+features[content][] = person-lord-de-mauley
+features[content][] = person-owen-paterson
+features[content][] = person-peter-unwin
+features[content][] = person-richard-benyon
+features[content][] = person-sergio
+features[content][] = person-wernher
+features[ctools][] = strongarm:strongarm:1
+features[features_api][] = api:1
+features[variable][] = node_content_enabled
