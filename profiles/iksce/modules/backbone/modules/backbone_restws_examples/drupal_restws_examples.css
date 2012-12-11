@@ -1,0 +1,15 @@
+.node {
+  border: 2px dashed #999;
+  padding: 10px;
+  margin: 10px 0px;
+  clear: all; }
+  .node .title {
+    display: inline-block; }
+  .node button {
+    float: right; }
+
+.promoted-0 {
+  background-color: #cccccc; }
+
+.promoted-1 {
+  background-color: Orange; }

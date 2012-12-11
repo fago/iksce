@@ -1,0 +1,105 @@
+<?php
+/**
+ * @file
+ * This module is an example of how a standard Drupal Backbone app is structure.
+ * The app is a simple on: it presents a form in which the user enters a node
+ * nid, then retrieves that node from the server via a REST call and presents it
+ * to the user.
+ *
+ * Most of the logic is in the backbone_example_app.js file in the js directory
+ * of the module.  The Drupal code below is mainly responsible for making sure
+ * all the right includes are presented on that page, and the template files for
+ * the Backbone app are managed by the theme layer.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function backbone_example_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#backbone_example':
+      return t("An example Backbone.js app, which mainly showcases node loading and rendering.");
+  }
+}
+
+/**
+ * Implements hook_menu().
+ *
+ * Our app needs a place to live, so we create a menu callback for it
+ */
+function backbone_example_menu() {
+  $items['backbone_example'] = array(
+    'title' => 'Backbone Example',
+    'description' => 'A basic Backbone Drupal app.',
+    'page callback' => 'backbone_example_admin_page',
+    'access arguments' => array('administer content'),
+    'weight' => 0,
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ *
+ * We use theme functions and template files to generate all Backbone templates.
+ * This allows us to leverage the Drupal theming layer to handle all themes, so
+ * we get all sorts of goodies like theme overrides and pre-process functions,
+ * all effortlessly folded into our Backbone app when the page renders.
+ *
+ * We've used a mix of function and tpl theme function types here, and with a
+ * larger project we'd likely want to organize our tpl files in a theme
+ * subdirectory of the module.
+ */
+function backbone_example_theme($existing, $type, $theme, $path) {
+  return array(
+    'backbone_example_node_template' => array(
+      'variables' => array(),
+    ),
+    'backbone_example_app_template' => array(
+      'template' => 'backbone-example-app-template',
+      'variables' => array(),
+    ),
+  );
+}
+
+/**
+ * Set up the app templates, js and container div.
+ *
+ * This is a pretty minimal function, since all our page needs to contain is an
+ * anchor div for our app to attach to and the correct templates and JavaScript
+ * files to run it.  We use backbone_add_template to include all templates in
+ * the code, and, as noted in the hook_theme documentation we use theme
+ * functions to generate all templates.
+ *
+ * @return Array
+ *   A render array for the tag of the app container.
+ */
+function backbone_example_admin_page() {
+  // Add backbone.js to page.
+  drupal_add_library('backbone_services', 'drupalbackbone-services');
+
+  // Add templates to page.
+  backbone_add_template('backbone-example-node-template', theme('backbone_example_node_template'));
+  backbone_add_template('backbone-example-app-template', theme('backbone_example_app_template'));
+  // Add app js.
+  drupal_add_js(drupal_get_path('module', 'backbone_example') . '/js/backbone_example_app.js');
+  // Return a container div for the app to anchor itself to.
+  return array(
+    '#type' => 'html_tag',
+    '#tag' => 'div',
+    '#attributes' => array(
+      'id' => 'backbone-example-app',
+    ),
+  );
+}
+
+/**
+ * Theme function for generating the node template.
+ *
+ * @return String
+ *   Return a standard _.template() style template.
+ */
+function theme_backbone_example_node_template() {
+  return '<% if (typeof(title) != "undefined" && typeof(body) != "undefined" ) { %><h2><%= title %></h2><div><%= body.und[0].safe_value %></div><% } %>';
+}

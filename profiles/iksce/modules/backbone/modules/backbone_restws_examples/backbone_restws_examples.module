@@ -1,0 +1,150 @@
+<?php
+/**
+ * @file
+ * This module is an example of how a standard Drupal Backbone app is structure.
+ * The app is a simple on: it presents a form in which the user enters a node
+ * nid, then retrieves that node from the server via a REST call and presents it
+ * to the user.
+ *
+ * Most of the logic is in the backbone_restws_examples_app.js file in the js directory
+ * of the module.  The Drupal code below is mainly responsible for making sure
+ * all the right includes are presented on that page, and the template files for
+ * the Backbone app are managed by the theme layer.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function backbone_restws_examples_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#backbone_restws_examples':
+      return t("An example Backbone.js/RestWS app, which mainly showcases node loading and rendering.");
+  }
+}
+
+/**
+ * Implements hook_menu().
+ *
+ * Our app needs a place to live, so we create a menu callback for it
+ */
+function backbone_restws_examples_menu() {
+  $items['backbone_restws_examples/node_render'] = array(
+    'title' => 'Backbone RestWS: Node Rendering',
+    'description' => 'Example of Rendering a Node with Drupal Backbone',
+    'page callback' => 'backbone_restws_examples_node_render',
+    'access arguments' => array('access content'),
+    'weight' => 0,
+  );
+  $items['backbone_restws_examples/collection_render'] = array(
+    'title' => 'Backbone RestWS: Collection Rendering',
+    'description' => 'Example of Rendering a Collection with Drupal Backbone',
+    'page callback' => 'backbone_restws_examples_collection_render',
+    'access arguments' => array('access content'),
+    'weight' => 4,
+  );
+  $items['backbone_restws_examples/node_event_bind'] = array(
+    'title' => 'Backbone RestWS: Bind a Node View Event',
+    'description' => 'Example of Binding to a Node View Event with Drupal Backbone',
+    'page callback' => 'backbone_restws_examples_node_event_bind',
+    'access arguments' => array('access content'),
+    'weight' => 8,
+  );
+  $items['backbone_restws_examples/collection_event_bind'] = array(
+    'title' => 'Backbone RestWS: Bind Events in a Collection',
+    'description' => 'Example of Binding to a Collection View Event with Drupal Backbone',
+    'page callback' => 'backbone_restws_examples_collection_event_bind',
+    'access arguments' => array('access content'),
+    'weight' => 10,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ *
+ * We use theme functions and template files to generate all Backbone templates.
+ * This allows us to leverage the Drupal theming layer to handle all themes, so
+ * we get all sorts of goodies like theme overrides and pre-process functions,
+ * all effortlessly folded into our Backbone app when the page renders.
+ *
+ * We've used a mix of function and tpl theme function types here, and with a
+ * larger project we'd likely want to organize our tpl files in a theme
+ * subdirectory of the module.
+ */
+function backbone_restws_examples_theme($existing, $type, $theme, $path) {
+  return array(
+    'backbone_restws_examples_node_template' => array(
+      'variables' => array(),
+      'template' => 'node-display.twig'
+    ),
+    'backbone_restws_examples_collection_template' => array(
+      'variables' => array(),
+      'template' => 'collection-render.twig'
+    ),
+    'backbone_restws_examples_node_event_bind_template' => array(
+      'variables' => array(),
+      'template' => 'collection-item-event-binding.twig'
+    ),
+  );
+}
+
+
+function backbone_restws_examples_node_render() {
+  drupal_add_library('backbone', 'drupalbackbone-restws');
+  drupal_add_library('backbone_library', 'twig.js');
+  backbone_add_template('backbone_restws_examples_node_template', theme('backbone_restws_examples_node_template'));
+  drupal_add_js(drupal_get_path('module', 'backbone_restws_examples') . '/js/node_render.js');
+  return array(
+    '#type' => 'html_tag',
+    '#tag' => 'div',
+    '#attributes' => array(
+      'id' => 'backbone-restws-examples-node-render-app',
+    ),
+  );
+}
+
+function backbone_restws_examples_collection_render() {
+  drupal_add_library('backbone', 'drupalbackbone-restws');
+  drupal_add_library('backbone_library', 'twig.js');
+  backbone_add_template('backbone_restws_examples_node_template', theme('backbone_restws_examples_node_template'));
+  backbone_add_template('backbone_restws_examples_collection_template', theme('backbone_restws_examples_collection_template'));
+  drupal_add_js(drupal_get_path('module', 'backbone_restws_examples') . '/js/collection_render.js');
+  return array(
+    '#type' => 'html_tag',
+    '#tag' => 'div',
+    '#attributes' => array(
+      'id' => 'backbone-restws-examples-collection-render-app',
+    ),
+  );
+}
+
+function backbone_restws_examples_node_event_bind() {
+  drupal_add_library('backbone', 'drupalbackbone-restws');
+  drupal_add_library('backbone_library', 'twig.js');
+  backbone_add_template('backbone_restws_examples_node_event_bind_template', theme('backbone_restws_examples_node_event_bind_template'));
+  drupal_add_js(drupal_get_path('module', 'backbone_restws_examples') . '/js/node_event_bind.js');
+  drupal_add_css(drupal_get_path('module', 'backbone_restws_examples') . '/drupal_restws_examples.css');
+  return array(
+    '#type' => 'html_tag',
+    '#tag' => 'div',
+    '#attributes' => array(
+      'id' => 'backbone-restws-examples-node-event-bind-app',
+    ),
+  );
+}
+
+function backbone_restws_examples_collection_event_bind() {
+  drupal_add_library('backbone', 'drupalbackbone-restws');
+  drupal_add_library('backbone_library', 'twig.js');
+  backbone_add_template('backbone_restws_examples_node_event_bind_template', theme('backbone_restws_examples_node_event_bind_template'));
+  backbone_add_template('backbone_restws_examples_collection_template', theme('backbone_restws_examples_collection_template'));
+  drupal_add_js(drupal_get_path('module', 'backbone_restws_examples') . '/js/collection_event_bind.js');
+  drupal_add_css(drupal_get_path('module', 'backbone_restws_examples') . '/drupal_restws_examples.css');
+  return array(
+    '#type' => 'html_tag',
+    '#tag' => 'div',
+    '#attributes' => array(
+      'id' => 'backbone-restws-examples-collection-event-bind-app',
+    ),
+  );
+}

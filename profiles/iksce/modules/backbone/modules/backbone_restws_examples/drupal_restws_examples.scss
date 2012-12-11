@@ -1,0 +1,23 @@
+$hl_color: Orange;
+$nohl_color: #CCC;
+
+.node {
+    border: 2px dashed #999;
+    padding: 10px;
+    margin: 10px 0px;
+    clear: all;
+    .title {
+	display: inline-block;
+    }
+    button {
+	float: right;
+    }
+}
+
+.promoted-0 {
+    background-color: $nohl_color;
+}
+
+.promoted-1 {
+    background-color: $hl_color;
+}

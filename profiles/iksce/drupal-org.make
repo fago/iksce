@@ -25,7 +25,13 @@ projects[search_api_stanbol][version] = "1.x-dev"
 libraries[nicedit][download][type] = "get"
 libraries[nicedit][download][url] = "http://js.nicedit.com/nicEdit-latest.js"
 libraries[nicedit][directory_name] = "nicedit"
+libraries[nicedit][download][filename] = "nicEdit.js"
 libraries[nicedit][type] = "library"
+
+libraries[nicediticons][download][type] = "get"
+libraries[nicediticons][download][url] = "http://js.nicedit.com/nicEditIcons-latest.gif"
+libraries[nicediticons][directory_name] = "nicedit"
+libraries[nicediticons][download][filename] = "nicEditorIcons.gif"
 
 libraries[ARC2][download][type] = "get"
 libraries[ARC2][download][url] = "http://github.com/semsol/arc2/tarball/master"
@@ -61,5 +67,3 @@ libraries[vie.annotate][download][type] = "get"
 libraries[vie.annotate][download][url] = "https://raw.github.com/szabyg/annotate.js/gh-pages/lib/annotate.js"
 libraries[vie.annotate][directory_name] = "vie"
 libraries[vie.annotate][type] = "library"
-
-

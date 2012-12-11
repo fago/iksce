@@ -1,0 +1,13 @@
+name = Backbone RestWS Examples
+description = Working code examples using Backbone and RestWS (adapted from the Backbone in the Front End presentation at Drupalcon Munich 2012).
+dependencies[] = backbone
+dependencies[] = restws
+package = Backbone
+core = 7.x
+
+; Information added by drupal.org packaging script on 2012-10-24
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "backbone"
+datestamp = "1351038955"
+

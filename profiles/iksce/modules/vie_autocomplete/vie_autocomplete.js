@@ -29,6 +29,7 @@
 
               // Read the name "field_tags[und][0][value]" and replace value.
               name = $(textfield).attr('name').replace('value', 'uri');
+              console.log(ui.item);
               $("input[name='" + name + "']").val(ui.item.getUri());
             },
             showTooltip : false

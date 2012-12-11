@@ -1,0 +1,32 @@
+(function ($){
+  Drupal.behaviors.backbone_munich = {
+    attach: function() {
+       // Load a node
+      var myNode = new Drupal.Backbone.Models.Node({
+	nid: 1
+      });
+      
+      // Display a node
+
+      // create our view class
+      var NodeView = Drupal.Backbone.Views.Base.extend({
+      	templateSelector: '#backbone_munich_node_template'
+      })
+
+      // create our view instance
+      var myNodeView = new NodeView({
+      	model: myNode,
+      	renderer: "twig",
+	el: '#backbone-munich-node-render-app'
+      });
+
+      // fetch the node, render when we've fetched
+      // (better way to do this is with bind(change))
+      myNode.fetch({
+	success: function() {
+      	  myNodeView.render();
+	}
+      });
+    }
+  }
+})(jQuery);

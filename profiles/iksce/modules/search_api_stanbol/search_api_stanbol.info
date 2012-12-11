@@ -1,0 +1,19 @@
+name = Stanbol search API integration (indexing only)
+description = Allows to index Drupal RDF data in Stanbol EntityHub.
+dependencies[] = rdfx
+dependencies[] = search_api
+core = 7.x
+package = Search
+
+files[] = service.inc
+#files[] = solr_connection.inc
+#files[] = solr_field.inc
+#files[] = includes/solr_httptransport.inc
+#files[] = includes/spellcheck.inc
+
+; Information added by drupal.org packaging script on 2012-12-08
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "search_api_stanbol"
+datestamp = "1354930355"
+

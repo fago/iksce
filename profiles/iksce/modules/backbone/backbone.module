@@ -1,0 +1,225 @@
+<?php
+/**
+ * @file
+ * Integration module for a version of Backbone.js for Drupal.
+ *
+ * TODO integrate with Backbone bootstrapping.
+ *   See (http://documentcloud.github.com/backbone/#FAQ-bootstrap).
+ */
+
+/**
+ * Implements hook_help().
+ */
+function backbone_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#backbone':
+      return t("Extensions to the backbone.js client-side MVC framework to make building interactive user interfaces with Drupal a breeze and a snap and a cinch!");
+  }
+}
+
+/**
+ * Implements hook_init().
+ *
+ * Add backbone.js and dependency underscore.js to all pages, along with
+ * related settings.
+ *
+ * TODO Make this conditional by page/configurable.
+ */
+function backbone_init() {
+  global $base_path;
+  $backbone_settings = array();
+  if (_backbone_variable_get('backend_module') == 'backbone_services') {
+    $backbone_settings['endpoint'] = $base_path . _backbone_variable_get('endpoint');
+  }
+  drupal_add_js(array('backbone' => $backbone_settings), 'setting');
+}
+
+/**
+ * Implements hook_backbone_init().
+ *
+ * We only add the backbone api js if the current page has been
+ * specified as a backbone page.
+ */
+function backbone_backbone_init($path) {
+  backbone_attach();
+}
+
+/**
+ * Attach backbone api libs to the page.
+ *
+ * At minimum this will include the basic drupalservices.js file.
+ * If there are plugins chosen, we'll include those too.
+ */
+function backbone_attach() {
+  drupal_add_library('backbone', 'drupalbackbone');
+  $backend_module = _backbone_variable_get('backend_module');
+  if (!empty($backend_module)) {
+    module_invoke($backend_module, 'backbone_attach');
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function backbone_theme($existing, $type, $theme, $path) {
+  return array(
+    'backbone_template' => array(
+      'render element' => 'template',
+    ),
+  );
+}
+
+/**
+ * Theme function for wrapping the template as needed for Backbone.View.render.
+ *
+ * By default, Drupal.Backbone.View uses Underscore templating and the
+ * element's DOM ID to extract the template source.
+ *
+ * @param Array $variables
+ *   Variables array containing the id and source for the template.
+ *
+ *   Note: all template sources provided by modules should be provided by theme
+ *   functions as well, so they can be overridden at the theme level as desired.
+ *
+ * @return String
+ *   The HTML for the wrapped template.
+ */
+function theme_backbone_template($variables = array()) {
+  $template_id = $variables['template']['#template_id'];
+  $template_source = $variables['template']['#template_source'];
+  return <<<TEMPLATE
+<script id="{$template_id}" type="text/underscore-template">
+{$template_source}
+</script>
+TEMPLATE;
+}
+
+/**
+ * Add template to array of templates to be included in page.
+ *
+ * Uses a global to store array, attaches at hook_page_build.
+ *
+ * @param String $template_id
+ *   The id of this template, will be the selector used in Backbone View.
+ * @param String $template_source
+ *   The source code of the template.
+ *
+ *   Note: all template sources provided by modules should be provided by theme
+ *   functions as well, so they can be overridden at the theme level as desired.
+ *
+ * @return void
+ *   Does not return anything of note.
+ */
+function backbone_add_template($template_id, $template_source) {
+  $templates = & drupal_static('backbone_templates', array());
+  $templates[$template_id] = $template_source;
+}
+
+/**
+ * Implements hook_page_build().
+ *
+ * Add the templates to the render array for the page, at the bottom of the
+ * page.  Uses the backbone_template theme hook to wrap in appropriate element
+ * for the template library being used.  Currently supports _.template()
+ * function.
+ *
+ * @TODO determine if there is a way to allow either .tmpl files or inline
+ *       templates.
+ */
+function backbone_page_build(&$page) {
+  $templates = drupal_static('backbone_templates', array());
+  foreach ((array) $templates as $template_id => $template_source) {
+    $page['page_bottom']['backbone_templates'][] = array(
+      '#theme' => 'backbone_template',
+      '#template_id' => $template_id,
+      '#template_source' => $template_source,
+    );
+  }
+}
+
+/**
+ * Implements hook_library().
+ */
+function backbone_library() {
+  $libraries['drupalbackbone'] = array(
+    'title' => 'drupalbackbone.js',
+    'website' => 'http://drupal.org/project/backbone',
+    'version' => '0.0.1',
+    'js' => array(
+      drupal_get_path('module', 'backbone') . '/js/drupalbackbone.js' => array(),
+    ),
+    'dependencies' => array(
+      array('backbone_library', 'backbone'),
+    ),
+  );
+  return $libraries;
+}
+
+/**
+ * Implements hook_library_alter().
+ *
+ * Standard method for including qunit tests if qunit is enabled.
+ */
+function backbone_library_alter(&$libraries, $module) {
+  // Add available JavaScript tests and dependencies.
+  if ($module == 'qunit') {
+    $libraries['qunit']['js'][drupal_get_path('module', 'backbone') . '/tests/backbone.test.js'] = array();
+  }
+}
+
+/**
+ * Settings form for the Backbone module.
+ *
+ * Delegates default value to _backbone_variable_get, where default values
+ * for all the module's variables are managed
+ *
+ * @todo Add conditional inclusion by path setting
+ *
+ * @access public
+ * @return Array
+ *   Form API array, prepared by system_settings_form
+ */
+function backbone_backbone_settings_form() {
+  $form = array();
+
+  $backends = module_invoke_all('backbone_backends');
+
+  $form['backbone_backend_module'] = array(
+    '#type' => 'select',
+    '#title' => t('REST Backend'),
+    '#description' => t('Choose whether to include either the <a href="http://drupal.org/project/restws">RestWS</a> or <a href="http://drupal.org/project/services">Services</a> backend support libraries.'),
+    '#default_value' => _backbone_variable_get('backend_module'),
+    '#options' => array(NULL => t('None')) + $backends,
+  );
+
+  $form['backbone_endpoint'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path to REST Endpoint'),
+    '#description' => t('This should be the "Path to endpoint" setting for the REST Service you have set up on the services page.  If you are using the Backbone Base feature, this should be "/backbone/rest". If you are using the RestWS implementation this setting is ignored.'),
+    '#default_value' => _backbone_variable_get('endpoint'),
+  );
+
+  return $form;
+}
+
+/**
+ * Abstraction function to simplify default variable values.
+ *
+ * @param String $name
+ *   Variable name, minus the "backbone_" prefix.
+ * @param Mixed $default_value
+ *   The default value of the variable, if null, we look up in a defaults array
+ *   in this function.
+ *
+ * @return Mixed
+ *   Value of variable or default.
+ */
+function _backbone_variable_get($name, $default_value = NULL) {
+  $defaults = array(
+    'endpoint' => 'backbone/rest',
+  );
+  if (!$default_value) {
+    $default_value = array_key_exists($name, $defaults) ? $defaults[$name] : NULL;
+  }
+  return variable_get('backbone_' . $name, $default_value);
+}
