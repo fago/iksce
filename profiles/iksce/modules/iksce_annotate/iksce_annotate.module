@@ -8,7 +8,7 @@
 /**
  * Implements hook_init().
  */
-function iksce_js_init() {
+function iksce_annotate_init() {
 
   // Enable to test annotate.js
   drupal_add_library('vie', 'vie.annotate');
