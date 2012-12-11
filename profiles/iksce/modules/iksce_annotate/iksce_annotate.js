@@ -4,7 +4,7 @@
   var selector = '.nicEdit-main';
 
   var options = {
-    autoAccept : true,
+    autoAccept : false,
     debug : true
   };
 
@@ -41,9 +41,16 @@
         },
         success: function(event, ui){
           logger.info('success event', event, ui);
+
+          $(event.target.button).find('.text').html(Drupal.t('Annotate'));
+          if (options.autoAccept) {
+            Drupal.iksce_annotate.acceptAll(event.target);
+          }
         },
         error: function(event, ui){
           logger.info('error event', event, ui);
+
+          $(event.target.button).find('.text').html(Drupal.t('Error!'));
         }
       });
       logger.log('annotated');
@@ -53,20 +60,8 @@
       $(button).find('.text').html('...');
       $(button).closest('.form-textarea-wrapper').find(selector)
         .each(function() {
-          var content = this;
-          $(content)
-            .annotate('enable', function(success) {
-              $(button).find('.text').html(Drupal.t('Annotate'));
-              logger.log('finished')
-
-              if (success && options.autoAccept) {
-                Drupal.iksce_annotate.acceptAll(content);
-              }
-              else if (!success) {
-                $(button).find('.text').html(Drupal.t('Error!'));
-                logger.warn('No success.');
-              }
-            });
+          this.button = button;
+          $(this).annotate('enable');
         });
     },
 
@@ -95,7 +90,6 @@
           Drupal.iksce_annotate.instantiate();
           Drupal.iksce_annotate.enable(this);
         });
-
 
       console.log('init');
     }
