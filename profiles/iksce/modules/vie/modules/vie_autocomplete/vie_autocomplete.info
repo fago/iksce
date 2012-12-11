@@ -1,0 +1,5 @@
+name = VIE.js autocomplete
+description = A VIE.js autocomplete widget for term references.
+core = 7.x
+dependencies[] = vie
+

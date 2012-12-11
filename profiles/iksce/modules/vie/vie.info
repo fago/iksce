@@ -1,0 +1,8 @@
+name = VIE.js
+description = Integrates the VIE.js javascript library.
+core = 7.x
+dependencies[] = backbone
+dependencies[] = backbone_library
+dependencies[] = jquery_update
+dependencies[] = libraries
+

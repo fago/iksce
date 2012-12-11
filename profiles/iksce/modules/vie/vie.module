@@ -1,0 +1,75 @@
+<?php
+
+/**
+ * @file
+ * VIE.js module.
+ */
+
+/**
+ * Returns the configuration for VIE.js
+ */
+function vie_get_stanbol_config() {
+  // This are the settings as passed to "new vie.StanbolService" in js.
+  return array(
+    'url' => variable_get('iksce_vie_stanbol_url', 'http://localhost:8080'),
+    'proxyDisabled' => TRUE,
+  );
+}
+
+/**
+ * Implements hook_library().
+ */
+function vie_library() {
+
+  $libraries['rdfquery'] = array(
+    'title' => 'rdfquery',
+    'website' => 'http://code.google.com/p/rdfquery/',
+    'version' => 'vie-dev',
+    'js' => array(
+      libraries_get_path('rdfquery') . '/jquery.rdfquery.min.js' => array(),
+    ),
+  );
+
+  $libraries['vie'] = array(
+    'title' => 'VIE.js',
+    'website' => 'http://viejs.org/',
+    'version' => '2.1.0',
+    'js' => array(
+      libraries_get_path('vie') . '/vie-2.1.0.js' => array(),
+      array('type' => 'setting', 'data' => array('iksce' => array('stanbol' => vie_get_stanbol_config()))),
+    ),
+    'dependencies' => array(
+      array('backbone_library' , 'backbone'),
+      array('vie' , 'rdfquery'),
+    ),
+  );
+
+  $libraries['vie.annotate'] = array(
+    'title' => 'vie.annotate.js',
+    'website' => 'https://github.com/szabyg/annotate.js',
+    'version' => 'dev',
+    'js' => array(
+      libraries_get_path('vie') . '/annotate.js' => array(),
+    ),
+    'dependencies' => array(
+      array('vie' , 'vie'),
+      array('system', 'ui.dialog'),
+      array('system', 'ui.autocomplete'),
+    ),
+  );
+
+  $libraries['vie.autocomplete'] = array(
+    'title' => 'vie.autocomplete.js',
+    'website' => 'https://github.com/szabyg/VIE.autocomplete',
+    'version' => 'dev',
+    'js' => array(
+      libraries_get_path('vie') . '/vie.autocomplete.js' => array(),
+    ),
+    'dependencies' => array(
+      array('vie' , 'vie'),
+      array('system', 'ui.autocomplete'),
+    ),
+  );
+
+  return $libraries;
+}
