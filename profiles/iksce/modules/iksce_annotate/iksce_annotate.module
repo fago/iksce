@@ -2,13 +2,13 @@
 
 /**
  * @file
- * IKS content enhancement annotate module file.
+ * IKS content enhancment javascript module file.
  */
 
 /**
  * Implements hook_init().
  */
-function iksce_annotate_init() {
+function iksce_js_init() {
 
   // Enable to test annotate.js
   drupal_add_library('vie', 'vie.annotate');

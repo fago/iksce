@@ -7,22 +7,20 @@
  */
 
 /**
- * Path to the ARC2 PHP library.
- */
-if (module_exists('libraries')) {
-  define('RDF_ARC2_PATH', libraries_get_path('ARC2') . '/arc');
-}
-else {
-  define('RDF_ARC2_PATH', drupal_get_path('module', 'rdfx') . '/vendor/arc');
-}
-
-/**
  * Implements hook_init().
  */
 function rdfx_init() {
+  // Get the path to the library.
+  if (module_exists('libraries')) {
+    $path = libraries_get_path('ARC2') . '/arc';
+  }
+  else {
+    $path = drupal_get_path('module', 'rdfx') . '/vendor/arc';
+  }
+
   // Attempts to load the ARC2 library, if available.
-  if (!class_exists('ARC2') && file_exists(RDF_ARC2_PATH . '/ARC2.php')) {
-    @include_once RDF_ARC2_PATH . '/ARC2.php';
+  if (!class_exists('ARC2') && file_exists($path . '/ARC2.php')) {
+    @include_once $path . '/ARC2.php';
   }
   module_load_include('inc', 'rdfx', 'rdfx.terms');
   module_load_include('inc', 'rdfx', 'rdfx.import');

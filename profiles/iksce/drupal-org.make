@@ -22,6 +22,9 @@ projects[search_api][version] = "1.x-dev"
 projects[search_api_stanbol][version] = "1.x-dev"
 projects[vie][version] = "1.x-dev"
 
+; http://drupal.org/node/1864074: rdfx does not find the arc library
+projects[rdfx][patch][] = "http://drupal.org/files/rdfx_library_path.patch"
+
 ; Libraries
 libraries[nicedit][download][type] = "get"
 libraries[nicedit][download][url] = "http://js.nicedit.com/nicEdit-latest.js"
