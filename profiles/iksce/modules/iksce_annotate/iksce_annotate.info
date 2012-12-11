@@ -1,0 +1,5 @@
+name = IKSce Annotate
+description = Integrates annotate.js with the nicEdit editor.
+package = IKSce Demo
+core = 7.x
+dependencies[] = vie

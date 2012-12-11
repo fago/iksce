@@ -25,4 +25,3 @@ dependencies[] = rdf
 dependencies[] = admin_menu
 dependencies[] = module_filter
 dependencies[] = iksce_demo
-dependencies[] = iksce_js

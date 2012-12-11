@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * IKS content enhancement annotate module file.
+ */
+
+/**
+ * Implements hook_init().
+ */
+function iksce_annotate_init() {
+
+  // Enable to test annotate.js
+  drupal_add_library('vie', 'vie.annotate');
+  // Let this run after wysiwyg.
+  drupal_add_js(drupal_get_path('module', 'iksce_annotate') . '/iksce_annotate.js', array('defer' => TRUE));
+  drupal_add_css(drupal_get_path('module', 'iksce_annotate') . '/iksce_annotate.css');
+}

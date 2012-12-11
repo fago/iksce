@@ -20,6 +20,7 @@ projects[defaultcontent][version] = "1.x"
 projects[rdfx][version] = "2.x"
 projects[search_api][version] = "1.x-dev"
 projects[search_api_stanbol][version] = "1.x-dev"
+projects[vie][version] = "1.x-dev"
 
 ; Libraries
 libraries[nicedit][download][type] = "get"
@@ -35,7 +36,7 @@ libraries[nicediticons][download][filename] = "nicEditorIcons.gif"
 
 libraries[ARC2][download][type] = "get"
 libraries[ARC2][download][url] = "http://github.com/semsol/arc2/tarball/master"
-libraries[ARC2][directory_name] = "ARC2"
+libraries[ARC2][directory_name] = "ARC2/arc"
 libraries[ARC2][type] = "library"
 
 libraries[backbone][download][type] = "get"
@@ -52,18 +53,3 @@ libraries[rdfquery][download][type] = "get"
 libraries[rdfquery][download][url] = "https://raw.github.com/bergie/VIE/gh-pages/js/vendor/jquery.rdfquery.min.js"
 libraries[rdfquery][directory_name] = "rdfquery"
 libraries[rdfquery][type] = "library"
-
-libraries[vie][download][type] = "get"
-libraries[vie][download][url] = "https://raw.github.com/bergie/VIE/gh-pages/js/vie-2.1.0.js"
-libraries[vie][directory_name] = "vie"
-libraries[vie][type] = "library"
-
-libraries[vie.autocomplete][download][type] = "get"
-libraries[vie.autocomplete][download][url] = "https://raw.github.com/bergie/VIE/gh-pages/js/vie.autocomplete.js"
-libraries[vie.autocomplete][directory_name] = "vie"
-libraries[vie.autocomplete][type] = "library"
-
-libraries[vie.annotate][download][type] = "get"
-libraries[vie.annotate][download][url] = "https://raw.github.com/szabyg/annotate.js/gh-pages/lib/annotate.js"
-libraries[vie.annotate][directory_name] = "vie"
-libraries[vie.annotate][type] = "library"
