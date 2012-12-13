@@ -2,6 +2,11 @@
 api = 2
 core = 7.x
 
+libraries[rdfquery][download][type] = "get"
+libraries[rdfquery][download][url] = "https://raw.github.com/bergie/VIE/gh-pages/js/vendor/jquery.rdfquery.min.js"
+libraries[rdfquery][directory_name] = "rdfquery"
+libraries[rdfquery][type] = "library"
+
 libraries[vie][download][type] = "get"
 libraries[vie][download][url] = "https://raw.github.com/bergie/VIE/gh-pages/js/vie-2.1.0.js"
 libraries[vie][directory_name] = "vie"

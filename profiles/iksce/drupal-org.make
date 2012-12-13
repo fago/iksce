@@ -52,7 +52,3 @@ libraries[underscore][download][url] = "http://documentcloud.github.com/undersco
 libraries[underscore][directory_name] = "underscore"
 libraries[underscore][type] = "library"
 
-libraries[rdfquery][download][type] = "get"
-libraries[rdfquery][download][url] = "https://raw.github.com/bergie/VIE/gh-pages/js/vendor/jquery.rdfquery.min.js"
-libraries[rdfquery][directory_name] = "rdfquery"
-libraries[rdfquery][type] = "library"
