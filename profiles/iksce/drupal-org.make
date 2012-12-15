@@ -20,7 +20,7 @@ projects[defaultcontent][version] = "1.x"
 projects[rdfx][version] = "2.x"
 projects[search_api][version] = "1.x-dev"
 projects[search_api_stanbol][version] = "1.x-dev"
-projects[vie][version] = "1.x-dev"
+projects[VIE][version] = "1.x-dev"
 
 ; http://drupal.org/node/1864074: rdfx does not find the arc library
 projects[rdfx][patch][] = "http://drupal.org/files/rdfx_library_path.patch"
@@ -51,4 +51,3 @@ libraries[underscore][download][type] = "get"
 libraries[underscore][download][url] = "http://documentcloud.github.com/underscore/underscore-min.js"
 libraries[underscore][directory_name] = "underscore"
 libraries[underscore][type] = "library"
-
